@@ -70,9 +70,12 @@ def load_csv_files(client, project_id, dataset_id, csv_directory):
                 write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
             )
             file_path = os.path.join(csv_directory, filename)
-            with open(file_path, "rb") as source_file:
-                load_job = client.load_table_from_file(source_file, table_ref, job_config=job_config)
-            load_job.result()
+            try:
+                with open(file_path, "rb") as source_file:
+                    load_job = client.load_table_from_file(source_file, table_ref, job_config=job_config)
+                load_job.result()
+            except Exception as e:
+                print(e)
             print(f"Loaded {filename} into {table_name}")
 
 def load_csv_to_bigquery(project_id, dataset_id, csv_directory, location="US"):

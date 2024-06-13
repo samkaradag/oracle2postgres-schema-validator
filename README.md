@@ -48,20 +48,26 @@ Set environment variables (refer to config.py.example):
 * **Collect Metadata:**
     * Oracle Collect: 
         ```bash 
-            ./collect_data.sh --connectionStr system/password@dbtns
+        cd collector/oracle-collector/
+        ./collect_data.sh --connectionStr system/password@dbtns
+        cp the zip files mentioned in the output under ../../importer/extracts/ folder
 
     * Postgres Collect: 
         ```bash 
+        cd collector/pg-collector/
         python collect_pgsql.py ip_address db_name db_user passwd config.yaml
+        cp extracted_data.zip ../../importer/extracts/
 
 * **Import to BigQuery:**
     ```bash 
+    cd ../../importer
     python importer.py --project_id your_project_id --dataset_id your_dataset_name 
 
-You can specify an empty dataset otherwise dataset will be created if not exists
+You can specify an empty dataset otherwise dataset will be created if not exists.This command will unzip all the zip files underthe extracts folder.
 
 * **Generate Reports:**
     ```bash 
+    cd ../importer
     python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
 
 ## Report Output
