@@ -1,6 +1,0 @@
-pkey,con_id,owner,name,type,nl_lines
-dms-test_2024-06-13075655,1,mockschema,generate_random_data,procedure,19
-dms-test_2024-06-13075655,1,mockschema,generate_randomizer_99,procedure,19
-dms-test_2024-06-13075655,1,mockschema,get_first_name,function,9
-dms-test_2024-06-13075655,1,mockschema,get_full_name,function,9
-dms-test_2024-06-13075655,1,mockschema,get_last_name,function,9

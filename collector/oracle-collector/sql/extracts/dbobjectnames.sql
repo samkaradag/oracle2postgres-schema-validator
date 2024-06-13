@@ -15,16 +15,14 @@ limitations under the License.
 */
 COLUMN EDITIONABLE FORMAT A11
 spool &outputdir/opdb__dbobjectnames__&v_tag
-prompt PKEY|CON_ID|OWNER|OBJECT_NAME|OBJECT_TYPE|EDITIONABLE|LINES|STATUS|DMA_SOURCE_ID|DMA_MANUAL_ID
+prompt PKEY|CON_ID|OWNER|OBJECT_NAME|OBJECT_TYPE|DMA_SOURCE_ID|DMA_MANUAL_ID
 WITH
 vdbobji AS (
         SELECT
                &v_a_con_id AS con_id,
                owner,
-               object_type,
-               &v_editionable_col AS editionable,
                object_name,
-               status
+               object_type
         FROM &v_tblprefix._objects a
         WHERE  (owner = 'SYS' AND object_type = 'DIRECTORY')
            OR owner NOT IN
