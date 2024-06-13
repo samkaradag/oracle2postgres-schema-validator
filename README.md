@@ -46,21 +46,21 @@ Set environment variables (refer to config.py.example):
 
 ## Usage
 * **Collect Metadata:**
-Oracle Collect: 
-./collect_data.sh --connectionStr system/password@dbtns
+    * Oracle Collect: 
+```./collect_data.sh --connectionStr system/password@dbtns
 
-Postgres Collect: 
-python collect_pgsql.py ip_address db_name db_user passwd config.yaml
+    * Postgres Collect: 
+```python collect_pgsql.py ip_address db_name db_user passwd config.yaml
 
 * **Import to BigQuery:**
 
-python importer.py --project_id your_project_id --dataset_id your_dataset_name 
+```python importer.py --project_id your_project_id --dataset_id your_dataset_name 
 
 You can specify an empty dataset otherwise dataset will be created if not exists
 
 * **Generate Reports:**
 
-python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
+```python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
 
 ## Report Output
 The generated reports will be saved in the reports directory.
