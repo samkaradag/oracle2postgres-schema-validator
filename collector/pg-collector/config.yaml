@@ -1,0 +1,57 @@
+database:
+  host: "35.204.159.2"
+  name: "dms-test"
+  user: "dms-test"
+  password: "samet123"
+
+queries:
+  - name: "tabcolumns"
+    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID, table_schema as OWNER, table_name as TABLE_NAME, column_name as COLUMN_NAME, data_type as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
+  - name: "views"
+    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,table_schema, table_name from information_schema.views where table_schema not in ('pg_catalog','information_schema');"
+  - name: "dbobjectnames" 
+    query: | 
+      SELECT
+          current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,
+          n.nspname AS OWNER,    -- Schema containing the object
+          c.relname AS OBJECT_NAME, -- Object name
+          CASE c.relkind 
+              WHEN 'r' THEN 'TABLE'       -- Regular table
+              WHEN 'v' THEN 'VIEW'        -- View
+              WHEN 'm' THEN 'MATERIALIZED VIEW'  
+              WHEN 'i' THEN 'INDEX'       -- Index
+              WHEN 'S' THEN 'SEQUENCE'    -- Sequence
+              WHEN 't' THEN 'TOAST TABLE' -- TOAST table (internal)
+              WHEN 'p' THEN 'PARTITIONED TABLE' -- Partitioned table
+              ELSE c.relkind::text        -- Other object types
+          END AS OBJECT_TYPE
+      FROM
+          pg_class c
+      LEFT JOIN
+          pg_namespace n ON n.oid = c.relnamespace
+      WHERE
+          c.relkind IN ('r', 'v', 'm', 'i', 'S', 't', 'p')  -- Filter desired object types 
+          AND n.nspname NOT IN ('pg_catalog', 'information_schema','pg_toast')  -- Exclude system schemas
+      ORDER BY
+          3,4;
+  - name: "sourcecode_detailed" 
+    query: | 
+      SELECT
+          current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,
+          n.nspname AS OWNER,
+          p.proname AS NAME, -- Procedures and functions
+          CASE p.prokind 
+              WHEN 'p' THEN 'procedure'
+              WHEN 'f' THEN 'function'
+          END AS TYPE,
+          -- pg_get_functiondef(p.oid) AS definition,
+          (SELECT COUNT(*) FROM regexp_split_to_table(pg_get_functiondef(p.oid), '\n')) AS NL_LINES
+      FROM
+          pg_proc p
+      JOIN
+          pg_namespace n ON p.pronamespace = n.oid
+      WHERE
+          p.prolang = (SELECT oid FROM pg_language WHERE lanname = 'plpgsql')  -- Filter for PL/pgSQL
+          AND n.nspname NOT IN ('pg_catalog', 'information_schema')  -- Exclude system schemas
+      ORDER BY
+          3,4;

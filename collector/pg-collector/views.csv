@@ -1,0 +1,6 @@
+pkey,con_id,table_schema,table_name
+dms-test_2024-06-13075655,1,mockschema,emp_details_view
+dms-test_2024-06-13075655,1,mockschema,oracle_to_char_date
+dms-test_2024-06-13075655,1,mockschema,oracle_trunc_date
+dms-test_2024-06-13075655,1,mockschema,vw_listagg
+dms-test_2024-06-13075655,1,mockschema,vw_listagg_overflow

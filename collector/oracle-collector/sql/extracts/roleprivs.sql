@@ -1,0 +1,120 @@
+/*
+Copyright 2024 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+spool &outputdir/opdb__roleprivs__&v_tag
+prompt PKEY|CON_ID|GRANTEE|GRANTED_ROLE
+SELECT
+    :v_pkey AS pkey,
+    &v_a_con_id AS con_id,
+    grantee,
+    granted_role
+FROM
+    &v_tblprefix._role_privs a
+WHERE a.grantee NOT IN 
+('CONNECT',
+'RESOURCE',
+'DBA',
+'PDB_DBA',
+'AUDIT_ADMIN',
+'AUDIT_VIEWER',
+'SELECT_CATALOG_ROLE',
+'EXECUTE_CATALOG_ROLE',
+'CAPTURE_ADMIN',
+'EXP_FULL_DATABASE',
+'IMP_FULL_DATABASE',
+'CDB_DBA',
+'APPLICATION_TRACE_VIEWER',
+'LOGSTDBY_ADMINISTRATOR',
+'DBFS_ROLE',
+'GSMUSER_ROLE',
+'GSMROOTUSER_ROLE',
+'AQ_ADMINISTRATOR_ROLE',
+'AQ_USER_ROLE',
+'DATAPUMP_EXP_FULL_DATABASE',
+'DATAPUMP_IMP_FULL_DATABASE',
+'ADM_PARALLEL_EXECUTE_TASK',
+'PROVISIONER',
+'XS_SESSION_ADMIN',
+'XS_NAMESPACE_ADMIN',
+'XS_CACHE_ADMIN',
+'XS_CONNECT',
+'GATHER_SYSTEM_STATISTICS',
+'OPTIMIZER_PROCESSING_RATE',
+'DBMS_MDX_INTERNAL',
+'BDSQL_ADMIN',
+'BDSQL_USER',
+'RECOVERY_CATALOG_OWNER',
+'RECOVERY_CATALOG_OWNER_VPD',
+'RECOVERY_CATALOG_USER',
+'EM_EXPRESS_BASIC',
+'EM_EXPRESS_ALL',
+'SYSUMF_ROLE',
+'SCHEDULER_ADMIN',
+'HS_ADMIN_SELECT_ROLE',
+'HS_ADMIN_EXECUTE_ROLE',
+'HS_ADMIN_ROLE',
+'GLOBAL_AQ_USER_ROLE',
+'OEM_ADVISOR',
+'OEM_MONITOR',
+'JAVAIDPRIV',
+'GSMADMIN_ROLE',
+'GSM_POOLADMIN_ROLE',
+'GDS_CATALOG_SELECT',
+'GGSYS_ROLE',
+'XDBADMIN',
+'XDB_SET_INVOKER',
+'AUTHENTICATEDUSER',
+'XDB_WEBSERVICES',
+'XDB_WEBSERVICES_WITH_PUBLIC',
+'XDB_WEBSERVICES_OVER_HTTP',
+'SODA_APP',
+'DATAPATCH_ROLE',
+'WM_ADMIN_ROLE',
+'JAVAUSERPRIV',
+'RDFCTX_ADMIN',
+'JAVASYSPRIV',
+'JAVADEBUGPRIV',
+'EJBCLIENT',
+'JMXSERVER',
+'DBJAVASCRIPT',
+'JAVA_ADMIN',
+'CTXAPP',
+'ORDADMIN',
+'OLAP_XS_ADMIN',
+'OLAP_DBA',
+'OLAP_USER',
+'DV_SECANALYST',
+'LBAC_DBA',
+'DV_MONITOR',
+'DV_ADMIN',
+'DV_OWNER',
+'DV_ACCTMGR',
+'DV_PUBLIC',
+'DV_PATCH_ADMIN',
+'DV_STREAMS_ADMIN',
+'DV_GOLDENGATE_ADMIN',
+'DV_XSTREAM_ADMIN',
+'DV_GOLDENGATE_REDO_ACCESS',
+'DV_AUDIT_CLEANUP',
+'DV_DATAPUMP_NETWORK_LINK',
+'DV_POLICY_OWNER',
+'DV_REALM_RESOURCE',
+'DV_REALM_OWNER'
+) and grantee NOT IN
+@&EXTRACTSDIR/exclude_schemas.sql
+;
+
+spool off
