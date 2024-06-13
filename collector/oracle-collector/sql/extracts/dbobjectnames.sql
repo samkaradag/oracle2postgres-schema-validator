@@ -67,10 +67,7 @@ SELECT pkey ,
        con_id ,
        owner ,
        object_name,
-       object_type ,
-       editionable ,
-       lines,
-       status,
+       object_type,
        :v_dma_source_id AS DMA_SOURCE_ID, :v_manual_unique_id AS DMA_MANUAL_ID
 FROM vdbobj a;
 spool off
