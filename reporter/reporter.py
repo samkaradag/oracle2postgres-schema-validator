@@ -94,6 +94,7 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
     <!DOCTYPE html>
     <html>
     <head>
+        <link rel="stylesheet" href="report.css">
         <title>Database Comparison Report</title>
         <style>
             body {{

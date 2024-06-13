@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 spool &outputdir/opdb__triggers__&v_tag
-prompt PKEY|CON_ID|OWNER|trigger_name|TRIGGER_TYPE|TRIGGERING_EVENT|BASE_OBJECT_TYPE|DMA_SOURCE_ID|DMA_MANUAL_ID
+prompt PKEY|CON_ID|OWNER|trigger_name|BASE_OBJECT_TYPE|STATUS|DMA_SOURCE_ID|DMA_MANUAL_ID
 WITH trginfo AS (
 SELECT
     &v_a_con_id AS con_id,
@@ -22,7 +22,9 @@ SELECT
     trigger_name,
     trigger_type,
     triggering_event,
-    base_object_type
+    table_name,
+    base_object_type,
+    status
 FROM
     &v_tblprefix._triggers a
 WHERE
@@ -49,9 +51,9 @@ SELECT :v_pkey AS pkey,
        con_id,
        owner,
        trigger_name,
-       trigger_type,
-       triggering_event,
+       table_name,
        base_object_type,
+       status,
        :v_dma_source_id AS DMA_SOURCE_ID, :v_manual_unique_id AS DMA_MANUAL_ID
 FROM  trginfo;
 spool off
