@@ -1,0 +1,5 @@
+google-cloud==0.34.0
+google-cloud-bigquery
+pyyaml==6.0.1
+tabulate
+psycopg2

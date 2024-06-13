@@ -5,16 +5,18 @@ database:
   password: "samet123"
 
 queries:
-  - name: "pgdb__tabcolumns__data"
-    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID, table_schema as OWNER, table_name as TABLE_NAME, column_name as COLUMN_NAME, data_type as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
+  - name: "pgdb__columns__data"
+    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
+  - name: "pgdb__instances__data"
+    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID;"
   - name: "pgdb__views__data"
-    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,table_schema, table_name, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID from information_schema.views where table_schema not in ('pg_catalog','information_schema');"
+    query: "select current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID, UPPER(table_schema) OWNER, UPPER(table_name) VIEW_NAME, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID from information_schema.views where table_schema not in ('pg_catalog','information_schema');"
   - name: "pgdb__dbobjectnames__data" 
     query: | 
       SELECT
           current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,
-          n.nspname AS OWNER,    -- Schema containing the object
-          c.relname AS OBJECT_NAME, -- Object name
+          UPPER(n.nspname) AS OWNER,    -- Schema containing the object
+          UPPER(c.relname) AS OBJECT_NAME, -- Object name
           CASE c.relkind 
               WHEN 'r' THEN 'TABLE'       -- Regular table
               WHEN 'v' THEN 'VIEW'        -- View
@@ -34,18 +36,18 @@ queries:
           AND n.nspname NOT IN ('pg_catalog', 'information_schema','pg_toast')  -- Exclude system schemas
       ORDER BY
           3,4;
-  - name: "pgdb__sourcecode_detailed__data" 
+  - name: "pgdb__sourcecodedetailed__data" 
     query: | 
       SELECT
           current_database() ||'_'|| to_char(now(), 'YYYY-MM-DDHH24MISS') AS PKEY,1 AS CON_ID,
-          n.nspname AS OWNER,
-          p.proname AS NAME, -- Procedures and functions
+          UPPER(n.nspname) AS OWNER,
+          UPPER(p.proname) AS NAME, -- Procedures and functions
           CASE p.prokind 
-              WHEN 'p' THEN 'procedure'
-              WHEN 'f' THEN 'function'
+              WHEN 'p' THEN 'PROCEDURE'
+              WHEN 'f' THEN 'FUNCTION'
           END AS TYPE,
           -- pg_get_functiondef(p.oid) AS definition,
-          (SELECT COUNT(*) FROM regexp_split_to_table(pg_get_functiondef(p.oid), '\n')) AS NL_LINES, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
+          (SELECT COUNT(*) FROM regexp_split_to_table(pg_get_functiondef(p.oid), '\n')) AS NR_LINES, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
       FROM
           pg_proc p
       JOIN
