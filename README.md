@@ -23,7 +23,7 @@ This utility streamlines the process of comparing the schemas and code objects o
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/](https://github.com/)<your-username>/<your-repository>.git
+   git clone https://github.com/samkaradag/oracle2postgres-schema-validator
 
 2. **Set Up Environment:**
 Install required Python packages:
