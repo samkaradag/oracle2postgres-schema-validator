@@ -19,10 +19,12 @@ prompt PKEY|CON_ID|OWNER|OBJECT_NAME|OBJECT_TYPE|DMA_SOURCE_ID|DMA_MANUAL_ID
 WITH
 vdbobji AS (
         SELECT
-               &v_a_con_id AS con_id,
+              &v_a_con_id AS con_id,
                owner,
+               object_type,
+               &v_editionable_col AS editionable,
                object_name,
-               object_type
+               status
         FROM &v_tblprefix._objects a
         WHERE  (owner = 'SYS' AND object_type = 'DIRECTORY')
            OR owner NOT IN
