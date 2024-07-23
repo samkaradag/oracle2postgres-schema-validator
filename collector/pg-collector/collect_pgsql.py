@@ -48,7 +48,7 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
         csv_file = f"{query_name}.csv"
 
         with open(csv_file, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
+            writer = csv.writer(csvfile, delimiter='|')
 
             # Write the column headers (optional, can be customized)
             writer.writerow([desc[0] for desc in cur.description])

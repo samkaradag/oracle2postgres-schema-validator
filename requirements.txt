@@ -3,3 +3,5 @@ google-cloud-bigquery
 pyyaml==6.0.1
 tabulate
 psycopg2
+sqlalchemy
+pandas
