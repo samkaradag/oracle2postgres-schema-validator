@@ -1,3 +1,4 @@
+Instances: instances.sql
 Object Counts: object_counts.sql
 Mismatched Object Counts: object_counts_mismatch.sql
 Object Counts (per Schema): object_counts_per_schema.sql

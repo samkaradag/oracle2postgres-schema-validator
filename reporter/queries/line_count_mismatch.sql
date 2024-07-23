@@ -20,8 +20,8 @@ SELECT * FROM (
     MAX(IF(instance_id = (SELECT instance_id FROM instances LIMIT 1 OFFSET 0), SUM_NR_LINES, NULL)) AS instance_1_line_count,
     MAX(IF(instance_id = (SELECT instance_id FROM instances LIMIT 1 OFFSET 1), SUM_NR_LINES, NULL)) AS instance_2_line_count
     -- Add more columns for additional instances as needed
-  FROM line_counts
+  FROM line_counts i1
   GROUP BY OWNER, TYPE
   ORDER BY OWNER, TYPE)
-WHERE instance_1_line_count != instance_2_line_count
+WHERE instance_1_line_count != instance_2_line_count <schema_filter>
 ;

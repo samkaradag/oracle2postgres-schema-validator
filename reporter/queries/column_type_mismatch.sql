@@ -12,5 +12,5 @@ SELECT
   i2.NULLABLE instance_2_nullable
 FROM <dataset_name>.columns i1
 JOIN <dataset_name>.columns i2 ON i1.OWNER = i2.OWNER AND i1.TABLE_NAME = i2.TABLE_NAME AND i1.COLUMN_NAME = i2.COLUMN_NAME AND (i1.DATA_TYPE != i2.DATA_TYPE or i1.DATA_LENGTH != i2.DATA_LENGTH or i1.DATA_PRECISION != i2.DATA_PRECISION or i1.DATA_SCALE != i2.DATA_SCALE  or i1.NULLABLE != i2.NULLABLE )  AND i2.PKEY = '<instance_2_id>'
-WHERE i1.PKEY = '<instance_1_id>'
+WHERE i1.PKEY = '<instance_1_id>' <schema_filter>
 ORDER BY i1.OWNER, i1.TABLE_NAME, i1.COLUMN_NAME;

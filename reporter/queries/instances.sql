@@ -1,0 +1,1 @@
+SELECT DISTINCT PKEY AS instance_id FROM <dataset_name>.instances
