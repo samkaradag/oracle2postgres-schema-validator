@@ -50,9 +50,10 @@ dataset_name = args.dataset_name or os.environ.get("DATASET_NAME") or DEFAULT_DA
 table_name = args.table_name or os.environ.get("TABLE_NAME") or DEFAULT_TABLE_NAME
 schema_name = args.schema_name or os.environ.get("SCHEMA_NAME") or DEFAULT_SCHEMA_NAME
 schemas_to_compare = args.schemas_to_compare or os.environ.get("SCHEMAS_TO_COMPARE")
-schemas_to_compare = schemas_to_compare.split(',')
-schemas_to_compare = [f"'{item.strip()}'" for item in schemas_to_compare]
-schemas_to_compare = ','.join(schemas_to_compare)
+if(schemas_to_compare):
+    schemas_to_compare = schemas_to_compare.split(',')
+    schemas_to_compare = [f"'{item.strip()}'" for item in schemas_to_compare]
+    schemas_to_compare = ','.join(schemas_to_compare)
 
 report_format = args.format
 db_type = args.db_type
