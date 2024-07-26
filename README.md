@@ -16,8 +16,12 @@ This utility streamlines the process of comparing the schemas and code objects o
 
 * **Oracle Database Access:** Credentials for Oracle database.
 * **Postgres Database Access:** Credentials for Postgres database.
-* **Google Cloud Project:**  A Google Cloud project with BigQuery enabled.
-* **Service Account:** A Google Cloud service account with BigQuery Data Editor and Job User roles.
+* **Staging Database** BigQuery or Postgres database is needed to stage extracted metadata
+    * BigQuery as Staging:
+        * **Google Cloud Project:**  A Google Cloud project with BigQuery enabled.
+        * **Service Account:** A Google Cloud service account with BigQuery Data Editor and Job User roles.
+    * Postgres as Staging:
+        * **Postgres Database** A Postgres database (maybe CloudSQL), database and username that create tables in the database.
 
 ## Installation
 
@@ -79,10 +83,13 @@ Set environment variables (refer to config.py.example):
         python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
 
     * Postgres as Staging Area:
-        python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database 
+        ```bash 
+        cd ../importer
+        python reporter.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database 
 
     * Filter Schemas:
-        python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database --schemas_to_compare 'SCHEMA1','SCHEMA2','SCHEMA3'
+        ```bash
+        python reporter.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database --schemas_to_compare 'SCHEMA1','SCHEMA2','SCHEMA3'
 
 
 ## Report Output
