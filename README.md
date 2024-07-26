@@ -57,35 +57,32 @@ Set environment variables (refer to config.py.example):
         cd collector/pg-collector/
         python collect_pgsql.py ip_address db_name db_user passwd config.yaml
         cp extracted_data.zip ../../importer/extracts/
-
-* **Import to BigQuery:**
-    ```bash 
-    cd ../../importer
-    python importer.py --project_id your_project_id --dataset_id your_dataset_name 
-
-You can specify an empty dataset otherwise dataset will be created if not exists.This command will unzip all the zip files underthe extracts folder.
-
-* **Import to Postgres:**
-    Create database schema and tables using create_pg_user.sql in postgres
-
-    ```bash 
+* **Import**
+    * **Import to BigQuery:**
+        ```bash 
         cd ../../importer
-        python importer.py --csv_directory ./extracts --postgres_connection_string postgresql://username:passwd@db_ip_host/dbname
+        python importer.py --project_id your_project_id --dataset_id your_dataset_name 
+
+        You can specify an empty dataset otherwise dataset will be created if not exists.This command will unzip all the zip files underthe extracts folder.
+
+    * **Import to Postgres:**
+        Create database schema and tables using create_pg_user.sql in postgres
+
+        ```bash 
+            cd ../../importer
+            python importer.py --csv_directory ./extracts --postgres_connection_string postgresql://username:passwd@db_ip_host/dbname
 
 * **Generate Reports:**
-
     * BigQuery as Staging Area:
-
-    ```bash 
-    cd ../importer
-    python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
+        ```bash 
+        cd ../importer
+        python reporter.py --project_id your_project_id --dataset_name your_dataset_name --table_name instances --format html
 
     * Postgres as Staging Area:
-    python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database 
+        python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database 
 
     * Filter Schemas:
-
-    python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database --schemas_to_compare 'SCHEMA1','SCHEMA2','SCHEMA3'
+        python reporter_pg.py --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database --schemas_to_compare 'SCHEMA1','SCHEMA2','SCHEMA3'
 
 
 ## Report Output
