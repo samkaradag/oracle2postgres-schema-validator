@@ -66,9 +66,11 @@ Set environment variables (refer to config.py.example):
 You can specify an empty dataset otherwise dataset will be created if not exists.This command will unzip all the zip files underthe extracts folder.
 
 * **Import to Postgres:**
+Create database schema and tables using create_pg_user.sql in postgres
+
 ```bash 
     cd ../../importer
-    python importer_pg.py --csv_directory ./extracts --postgres_connection_string postgresql://db-compare:db-compare@35.204.159.2/db-compare
+    python importer.py --csv_directory ./extracts --postgres_connection_string postgresql://username:passwd@db_ip_host/dbname
 
 * **Generate Reports:**
 
