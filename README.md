@@ -103,6 +103,6 @@ generate_report.py: Extend or modify the types of comparisons and report formats
 Contributions are welcome! Please feel free to open issues or submit pull requests.
 
 ## License
-This project is licensed under the Apache License.
+This project is licensed under the Google License.
 
 
