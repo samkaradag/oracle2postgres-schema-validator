@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oracle2postgres_schema_validator"
-version = "0.1.0"
+version = "0.1.2"
 description = "Tool to compare Oracle objects with Postgres objects"
 authors = ["sametkaradag <sametkaradag@gmail.com>"]
 license = "Google"

@@ -25,23 +25,24 @@ This utility streamlines the process of comparing the schemas and code objects o
 
 ## Installation
 
-1. **Clone the Repository:**
+1. **Install pip package:**
    ```bash
-   git clone https://github.com/samkaradag/oracle2postgres-schema-validator
-
+   pip install oracle2postgres_schema_validator
+   
 2. **Set Up Environment:**
-Install required Python packages:
-pip install -r requirements.txt
 
-Set environment variables (refer to config.py.example):
-* ORACLE_CONN_STRING: Connection string for the Oracle database(s).
+Required parameters:
+* ORACLE_CONN_STRING: Connection parameters (user, password, ip, service name) for the Source Oracle database(s).
+* Postgres Connection String: Connection parameters (user, password, ip, database name) for the Source Oracle database(s).
 * GOOGLE_APPLICATION_CREDENTIALS: Use gcloud auth application-default login (This is required if the staging area is BigQuery)
 * PROJECT_ID: Your Google Cloud project ID (This is required if the staging area is BigQuery).
 * DATASET_ID: The BigQuery dataset to use (Tool will create if it doesn't exist) (This is required if the staging area is BigQuery).
+* Postgres Staging environment: Seperate Postgres Database to store metadata if BigQuery will not be used for the same.
 
-## Client requirements:
+## Client environment requirements:
 
 * python3.9
+* Shell environment (CLI) to run python scripts.
 * Network connectivity to Oracle and Postgres instances and BigQuery APIs.
 
 ## Usage
@@ -220,6 +221,11 @@ The generated reports will be saved in the reports directory.
 
 ## Contributing
 Contributions are welcome! Please feel free to open issues or submit pull requests.
+
+   **Clone the Repository:**
+   ```bash
+   git clone https://github.com/samkaradag/oracle2postgres-schema-validator
+
 
 ## License
 This project is licensed under the Google License.
