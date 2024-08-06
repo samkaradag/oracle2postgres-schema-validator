@@ -20,8 +20,6 @@ from google.cloud.exceptions import NotFound
 import zipfile
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime
 import pandas as pd
 
 # Base = declarative_base()
@@ -58,7 +56,7 @@ def truncate_tables(client, project_id, dataset_id, csv_directory):
                     query_job = client.query(truncate_query)
                     query_job.result()  # Wait for the truncation to complete
                     print(f"Dropped table {table_name}")
-                except NotFound as e:
+                except NotFound:
                     print(f"Table {table_id} not found. Skipping drop operation.")
                 truncated_tables.add(table_name)  # Mark as truncated
 
@@ -68,7 +66,6 @@ def load_csv_files(client, project_id, dataset_id, csv_directory):
     for filename in os.listdir(csv_directory):
         if filename.endswith(".csv"):
             table_name = filename.split("__")[1]
-            table_id = f"{project_id}.{dataset_id}.{table_name}"
             table_ref = dataset_ref.table(table_name)
             job_config = bigquery.LoadJobConfig(
                 source_format=bigquery.SourceFormat.CSV,
@@ -115,8 +112,6 @@ def load_csv_to_postgres(csv_directory, postgres_connection_string):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-
-
     for filename in os.listdir(csv_directory):
         if filename.endswith(".csv") and (not  ("defines" in filename or "eoj" in filename)):
             file_path = os.path.join(csv_directory, filename)
@@ -132,14 +127,14 @@ def load_csv_to_postgres(csv_directory, postgres_connection_string):
             except Exception as e:
                 print(e)
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Load CSV files into BigQuery or PostgreSQL tables.")
-    parser.add_argument("--project_id", help="Your Google Cloud Project ID (for BigQuery).")
-    parser.add_argument("--dataset_id", help="The BigQuery dataset name.")
-    parser.add_argument("--csv_directory", default="./extracts", help="Directory containing CSV files.")
-    parser.add_argument("--zip_directory", default="./extracts", help="Directory containing ZIP files.")
-    parser.add_argument("--location", default="US", help="Geographic location for the dataset (default: US)")
-    parser.add_argument("--postgres_connection_string", help="Connection string for your PostgreSQL database (optional).")
+    parser.add_argument("--project_id", help="Your Google Cloud Project ID (for BigQuery). Use this if the staging area is BigQuery.")
+    parser.add_argument("--dataset_id", help="The BigQuery dataset name. Use this if the staging area is BigQuery.")
+    parser.add_argument("--csv_directory", default="extracts", help="Directory containing CSV files.")
+    parser.add_argument("--zip_directory", default="extracts", help="Directory containing ZIP files.")
+    parser.add_argument("--location", default="US", help="Geographic location for the dataset (default: US). Use this if the staging area is BigQuery.")
+    parser.add_argument("--postgres_connection_string", help="Connection string for your PostgreSQL database. Use this if the staging area is a postgres db. format: 'postgresql://username:pwd@ip_address/db_name'.")
     args = parser.parse_args()
 
     unzip_all_files(args.zip_directory)
@@ -149,3 +144,7 @@ if __name__ == "__main__":
 
     if args.postgres_connection_string:
         load_csv_to_postgres(args.csv_directory, args.postgres_connection_string)
+
+
+if __name__ == "__main__":
+    main()

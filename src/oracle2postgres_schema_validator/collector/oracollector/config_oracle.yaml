@@ -1,0 +1,78 @@
+queries:
+  - name: "orcl__columns__data"
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID,
+          owner,
+          table_name,
+          column_name,
+          data_type,
+          data_length,
+          data_precision,
+          data_scale,
+          nullable,
+          'Oracle' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID
+      FROM all_tab_columns
+      WHERE owner NOT IN ('SYS', 'SYSTEM')
+      ORDER BY owner, table_name, column_id
+  - name: "orcl__instances__data"
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID
+      FROM dual
+  - name: "orcl__views__data"
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID, 
+          owner, 
+          view_name, 
+          'Oracle' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID 
+      FROM all_views
+      WHERE owner NOT IN ('SYS', 'SYSTEM')
+  - name: "orcl__dbobjectnames__data" 
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID, 
+          owner, 
+          object_name, 
+          object_type,
+          'Oracle' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID 
+      FROM all_objects
+      WHERE owner NOT IN ('SYS', 'SYSTEM')
+      ORDER BY owner, object_type, object_name
+  - name: "orcl__sourcecodedetailed__data" 
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID, a.*, 'Oracle' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID 
+          from (
+                Select owner, 
+                name, 
+                type, 
+                max(line) NR_LINES
+            FROM all_source
+            WHERE owner NOT IN ('SYS', 'SYSTEM')
+            GROUP BY owner,name,type) a
+      ORDER BY owner, name, type
+  - name: "orcl__triggers__data" 
+    query: |
+      SELECT 
+          sys_context('userenv', 'current_schema') || '_' || to_char(sysdate, 'YYYY-MM-DDHH24MISS') AS PKEY,
+          1 AS CON_ID,
+          owner,
+          trigger_name,
+          table_name, 
+          status, 
+          'Oracle' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID 
+      FROM all_triggers
+      WHERE owner NOT IN ('SYS', 'SYSTEM')
+      ORDER by owner, trigger_name

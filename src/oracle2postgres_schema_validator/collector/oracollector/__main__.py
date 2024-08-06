@@ -13,35 +13,44 @@
 # limitations under the License.
 
 import yaml
-import psycopg2
+import oracledb
 import csv
 import os
 import zipfile
 import argparse
+import pathlib
 
-def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
+def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file):
     """
-    Extracts data from a Postgres database based on queries and connection settings
+    Extracts data from an Oracle database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
     and then zips all the CSV files.
 
     Args:
-        db_host: The hostname of the Postgres database.
-        db_name: The name of the Postgres database.
-        db_user: The username for the Postgres database.
-        db_password: The password for the Postgres database.
+        db_user: The username for the Oracle database.
+        db_password: The password for the Oracle database.
+        db_host: The hostname of the Oracle database.
+        db_port: The port number of the Oracle database.
+        db_service: The service name of the Oracle database.
         config_file: Path to the YAML configuration file.
     """
 
-    with open(config_file, 'r') as f:
+    # Load Configuration (Handle missing file gracefully)
+    # Get the absolute path to the script's directory
+    script_dir = pathlib.Path(__file__).parent.resolve()
+    # Join the script's directory path with the relative path to config.yaml
+    config_file_path = script_dir / config_file  
+    with open(config_file_path, 'r') as f:
         config = yaml.safe_load(f)
 
+    # Construct the connection string
+    dsn = oracledb.makedsn(host=db_host, port=db_port, service_name=db_service)
+
     # Connect to the database
-    conn = psycopg2.connect(
-        host=db_host,
-        database=db_name,
+    conn = oracledb.connect(
         user=db_user,
-        password=db_password
+        password=db_password,
+        dsn=dsn
     )
 
     # Create a cursor object
@@ -50,6 +59,7 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
+        print(f"Extracting: {query['name']}")
         cur.execute(query["query"])
 
         # Fetch all rows from the query result
@@ -71,7 +81,7 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
             writer.writerows(rows)
 
     # Zip all the CSV files
-    zip_file = "extracted_data.zip"
+    zip_file = f"orcl-extract-{db_host}.zip"
     with zipfile.ZipFile(zip_file, 'w') as z:
         for filename in os.listdir():
             if filename.endswith(".csv"):
@@ -84,13 +94,17 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
 
     print(f"Extracted data and saved to {zip_file}")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Extract data from a Postgres database')
-    parser.add_argument('host', type=str, help='Hostname of the Postgres database')
-    parser.add_argument('database', type=str, help='Name of the Postgres database')
-    parser.add_argument('user', type=str, help='Username for the Postgres database')
-    parser.add_argument('password', type=str, help='Password for the Postgres database')
-    parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
+def main():
+    parser = argparse.ArgumentParser(description='Extract data from an Oracle database')
+    parser.add_argument('--user', type=str, help='Username for the Oracle database')
+    parser.add_argument('--password', type=str, help='Password for the Oracle database')
+    parser.add_argument('--host', type=str, help='Hostname of the Oracle database')
+    parser.add_argument('--port', default='1521', type=str, help='Port number of the Oracle database')
+    parser.add_argument('--service', type=str, help='Service name of the Oracle database')
+    # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.host, args.database, args.user, args.password, args.config_file)
+    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml")
+
+if __name__ == "__main__":
+    main()
