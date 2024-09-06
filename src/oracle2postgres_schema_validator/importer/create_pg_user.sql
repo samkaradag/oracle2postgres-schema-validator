@@ -104,3 +104,4 @@ CREATE TABLE schema_compare.columns
   dma_source_id VARCHAR(1000),
   dma_manual_id VARCHAR(1000)
 );
+

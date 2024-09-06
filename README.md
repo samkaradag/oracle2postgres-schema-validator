@@ -48,7 +48,7 @@ Required parameters:
 ## Usage
 * **Collect Metadata:**
     * Oracle Collect: 
-        Grant required access to metadata views
+        Optional: Grant required access to metadata views which are the all_* views highlighted below. If you just want to get objects of the connected user you can skip this step and set --view_type to user.
 
         Please replace oracle_db_user with your database user.
         ```sql
@@ -70,8 +70,9 @@ Required parameters:
             GRANT SELECT ON all_tab_privs TO <db_user>;
             GRANT SELECT ON all_sys_privs TO <db_user>;
 
+        Execute the following command by putting your db connection settings. If you want to get all_* views use --view_type all, if you want to get user_* views use --view_type user:
         ```bash 
-        oracollector --host oracle_ip_address --user db_user --password db_passwd --service oracle_service_name
+        oracollector --host oracle_ip_address --user db_user --password db_passwd --service oracle_service_name --view_type all
 
     * Postgres Collect: 
         ```bash 
@@ -89,117 +90,9 @@ Required parameters:
         You can specify an empty dataset otherwise dataset will be created if not exists.This command will unzip all the zip files underthe extracts folder.
 
     * **Import to Postgres:**
-        Create database schema and tables using create_pg_user.sql in postgres
-        ```sql
-            CREATE SCHEMA IF NOT EXISTS schema_compare;
-
-            CREATE TABLE schema_compare.instances
-            (
-            pkey VARCHAR(1000),
-            con_id INT
-            );
-
-            CREATE TABLE schema_compare.dbobjectnames
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            object_name VARCHAR(1000),
-            object_type VARCHAR(1000),
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.sourcecodedetailed
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            name VARCHAR(1000),
-            type VARCHAR(1000),
-            nr_lines INT,
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.views
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            view_name VARCHAR(1000),
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.triggers
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            trigger_name VARCHAR(1000),
-            base_table VARCHAR(1000),
-            base_object_type VARCHAR(1000),
-            status VARCHAR(1000),
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.indexes
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            index_name VARCHAR(1000),
-            index_type VARCHAR(1000),
-            table_owner VARCHAR(1000),
-            table_name VARCHAR(1000),
-            uniqueness VARCHAR(1000),
-            status VARCHAR(1000),
-            num_rows INT,
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.eoj
-            (
-            pkey VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.defines
-            (
-            pkey VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.tableconstraints
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            table_name VARCHAR(1000),
-            constraint_type VARCHAR(1000),
-            constraint_name VARCHAR(1000),
-            status VARCHAR(1000)
-            );
-
-            CREATE TABLE schema_compare.columns
-            (
-            pkey VARCHAR(1000),
-            con_id INT,
-            owner VARCHAR(1000),
-            table_name VARCHAR(1000),
-            column_name VARCHAR(1000),
-            data_type VARCHAR(1000),
-            data_length INT,
-            data_precision INT,
-            data_scale INT,
-            nullable BOOL,
-            dma_source_id VARCHAR(1000),
-            dma_manual_id VARCHAR(1000)
-            );
-
-        ```bash 
-            importer --postgres_connection_string "postgresql://db-user:db-pwd@db_ip/db_name"
+        
+        ```bash
+        importer --postgres_connection_string "postgresql://db-user:db-pwd@db_ip/db_name" --schema schema_compare
 
 * **Generate Reports:**
     * BigQuery as Staging Area:
@@ -208,7 +101,7 @@ Required parameters:
 
     * Postgres as Staging Area:
         ```bash 
-        reporter --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database 
+        reporter --db_type postgres --postgres_host your_postgres_host --postgres_port your_postgres_port --postgres_user your_postgres_user --postgres_password your_postgres_password --postgres_database your_postgres_database --schema_name schema_compare
 
     * Filter Schemas:
         ```bash

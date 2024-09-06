@@ -19,167 +19,112 @@ from google.cloud import bigquery
 from tabulate import tabulate
 import datetime
 import psycopg2
+import pathlib
 
 # Configuration
 DEFAULT_PROJECT_ID = "your_project_id"
 DEFAULT_DATASET_NAME = "your_dataset_name"
 DEFAULT_TABLE_NAME = "instances"
-DEFAULT_SCHEMA_NAME = "schema_compare"
+DEFAULT_SCHEMA_NAME = "schema-compare"
 CONFIG_FILE = "query_config.yaml"
 QUERIES_FOLDER = "queries"
 
-# Global variables for database connections
-client = None  # BigQuery client
-cursor = None  # Postgres cursor
-conn = None   # Postgres connection
 
-def get_script_path():
-    """Returns the absolute path of the currently executing script."""
-    return os.path.dirname(os.path.abspath(__file__))
 
-def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
-    """Replaces placeholders in SQL queries."""
-    with open(os.path.join(get_script_path(), QUERIES_FOLDER, query_file), "r") as f:
+def replace_instance_id(query_file, schemas_to_compare, db_type):
+    # Replace instance id placeholders in the queries
+    # Replace schema filters
+    # print (f"Schemas to compare:{schemas_to_compare}")
+    if (schemas_to_compare):
+        w_schema_filter = f'WHERE OWNER in ({schemas_to_compare})'
+        a_schema_filter = f'AND a.OWNER in ({schemas_to_compare})'
+        schema_filter = f'AND i1.OWNER in ({schemas_to_compare})'
+    else:
+        w_schema_filter = ''
+        a_schema_filter = ''
+        schema_filter = ''
+    with open(f"{QUERIES_FOLDER}/{query_file}", "r") as f:
         query = f.read()
         query = query.replace('<instance_1_id>', instance_1_name)
         query = query.replace('<instance_2_id>', instance_2_name)
-        
-        if schemas_to_compare:
-            query = query.replace('<w_schema_filter>', f'WHERE OWNER in ({schemas_to_compare})')
-            query = query.replace('<a_schema_filter>', f'AND a.OWNER in ({schemas_to_compare})')
-            query = query.replace('<schema_filter>', f'AND i1.OWNER in ({schemas_to_compare})')
-        else:
-            query = query.replace('<w_schema_filter>', '')
-            query = query.replace('<a_schema_filter>', '')
-            query = query.replace('<schema_filter>', '')
-        
+        query = query.replace('<w_schema_filter>', w_schema_filter)
+        query = query.replace('<a_schema_filter>', a_schema_filter)
+        query = query.replace('<schema_filter>', schema_filter)
         if db_type == "bigquery":
             query = query.replace('<dataset_name>', dataset_name)
         elif db_type == "postgres":
             query = query.replace('<dataset_name>', schema_name)
         return query
 
-def execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
-    """Executes SQL queries from configuration."""
+# Function to load and execute queries from files
+def execute_queries(config, schemas_to_compare, db_type,project_id, cursor):
     results = []
     for section, query_file in config.items():
         print("Checking: ", section)
-        query = replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name)
-        results.append(execute_query(query))
+        with open(f"{QUERIES_FOLDER}/{query_file}", "r"):
+            query = replace_instance_id(query_file, schemas_to_compare, db_type)
+            results.append(execute_query(query, db_type,project_id, cursor))
     return results
 
-def execute_query(query):
-    """Executes a single SQL query."""
-    global client, cursor
+def execute_query(query, db_type,project_id, cursor):
     if db_type == "bigquery":
+        client = bigquery.Client(project=project_id)
         query_job = client.query(query)
-        results = list(query_job.result())
+        results = query_job.result()
+        # Convert BigQuery Row objects to dictionaries
+        results = [dict(row) for row in results]  # Convert to dictionaries
     elif db_type == "postgres":
         cursor.execute(query)
         headers = [desc[0] for desc in cursor.description]
-        results = [dict(zip(headers, row)) for row in cursor.fetchall()]
+        results = cursor.fetchall()
+        # Convert Postgres tuples to dictionaries (using headers from first tuple)
+        if results:  # Check if results is not empty
+            results = [dict(zip(headers, row)) for row in results]
     return results
 
+# Function to generate text report
 def generate_text_report(config, results, instance_1_name, instance_2_name):
-    """Generates a text report."""
     report = "## Database Comparison Report\n\n"
+
     for i, (section, query_file) in enumerate(config.items()):
         report += f"### {section}\n"
+
         table_data = results[i]
-        if table_data:
+
+        if table_data:  # Check if result set is not empty
             report += tabulate(table_data, headers="keys", tablefmt="github") + "\n\n"
         else:
             report += "No results found.\n\n"
+
     return report
 
+# Function to generate HTML report
 def generate_html_report(config, results, instance_1_name, instance_2_name):
-    """Generates an HTML report."""
     report = """
     <!DOCTYPE html>
     <html>
     <head>
+    <link rel="stylesheet" href="report.css">
     <title>Database Comparison Report</title>
     <style>
     body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-      }
-      
-      h2 {
-        color: #2980b9;
-        text-align: center;
-        margin-bottom: 1em;
-      }
-      
-      h3 {
-        color: #3498db;
-        margin-top: 2em;
-        margin-bottom: 1em;
-      }
-      
-      ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        margin-bottom: 2em;
-      }
-      
-      li {
-        display: inline-block;
-        margin: 0 1em;
-      }
-      
-      a {
-        color: #2980b9;
-        text-decoration: none;
-      }
-      
-      a:hover {
-        text-decoration: underline;
-      }
-      
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-bottom: 2em;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-      
-      th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-      }
-      
-      th {
-        background-color: #f0f0f0;
-        font-weight: bold;
-      }
-      
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
-      
-      tr:hover {
-        background-color: #e0e0e0;
-      }
-      
-      .missing {
-        color: #c0392b;
-        font-weight: bold;
-      }
-      
-      .present {
-        color: #2ecc71;
-        font-weight: bold;
-      }
-      .back-to-top {
+    font-family: sans-serif;
+    }
+    h2, h3 {
+    margin-top: 2em;
+    }
+    table {
+    border-collapse: collapse;
+    width: 100%;
+    }
+    th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    }
+    th {
+    text-align: left;
+    }
+    .back-to-top {
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -203,27 +148,32 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
     <h2>Database Comparison Report</h2>
     <ul>
     """
+
     for i, (section, query_file) in enumerate(config.items()):
         report += f"<li><a href='#{section.replace(' ', '_')}'>{section}</a></li>"
 
-    report += "</ul>"
+    report += """
+    </ul>
+    """
 
     for i, (section, query_file) in enumerate(config.items()):
         report += f"<h3><a name='{section.replace(' ', '_')}'></a>{section}</h3>"
+
         table_data = results[i]
-        if table_data:
-            report += "<table><thead><tr>"
+
+        if table_data:  # Check if result set is not empty
+            report += "<table>\n<thead>\n<tr>\n"
             for header in table_data[0].keys():
-                report += f"<th>{header}</th>"
-            report += "</tr></thead><tbody>"
+                report += f"<th>{header}</th>\n"
+            report += "</tr>\n</thead>\n<tbody>\n"
             for row in table_data:
-                report += "<tr>"
+                report += "<tr>\n"
                 for value in row.values():
-                    report += f"<td>{value}</td>"
-                report += "</tr>"
-            report += "</tbody></table>"
+                    report += f"<td>{value}</td>\n"
+                report += "</tr>\n"
+            report += "</tbody>\n</table>\n\n"
         else:
-            report += "<p>No results found.</p>"
+            report += "<p>No results found.</p>\n\n"
 
     report += """
     <button class="back-to-top"><i class="fas fa-arrow-up"></i></button>
@@ -251,21 +201,8 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
     """
     return report
 
-def get_instance_names(dataset_name, schema_name, table_name):
-    """Retrieves distinct instance names from the database."""
-    global client, cursor
-    if db_type == "bigquery":
-        instances = client.query(f"SELECT DISTINCT PKEY FROM {dataset_name}.{table_name}").result()
-        instance_names = [row[0] for row in instances]
-    elif db_type == "postgres":
-        cursor.execute(f"SELECT DISTINCT PKEY FROM {schema_name}.{table_name}")
-        instance_names = [row[0] for row in cursor.fetchall()]
-    return instance_names
-
 def main():
-    """Main function to execute the script."""
-    global client, cursor, conn, db_type, project_id, dataset_name, table_name, schema_name, schemas_to_compare, report_format
-
+    # Argument parsing
     parser = argparse.ArgumentParser(description="Generate database comparison report.")
     parser.add_argument("--project_id", help="Google Cloud project ID.")
     parser.add_argument("--dataset_name", help="BigQuery dataset name.")
@@ -278,17 +215,20 @@ def main():
     parser.add_argument("--postgres_password", help="Postgres password.")
     parser.add_argument("--postgres_database", help="Postgres database name.")
     parser.add_argument("--schema_name", help="Postgres schema name.")
-    parser.add_argument("--schemas_to_compare", help="Schemas to be compared (comma-separated).")
+    parser.add_argument("--schemas_to_compare", help="Schemas to be compared.")
     args = parser.parse_args()
 
-    # Get configuration
+    # Get configuration from environment variables or command-line arguments
     project_id = args.project_id or os.environ.get("PROJECT_ID") or DEFAULT_PROJECT_ID
     dataset_name = args.dataset_name or os.environ.get("DATASET_NAME") or DEFAULT_DATASET_NAME
     table_name = args.table_name or os.environ.get("TABLE_NAME") or DEFAULT_TABLE_NAME
     schema_name = args.schema_name or os.environ.get("SCHEMA_NAME") or DEFAULT_SCHEMA_NAME
     schemas_to_compare = args.schemas_to_compare or os.environ.get("SCHEMAS_TO_COMPARE")
-    if schemas_to_compare:
-        schemas_to_compare = ",".join([f"'{item.strip()}'" for item in schemas_to_compare.split(',')])
+    if(schemas_to_compare):
+        schemas_to_compare = schemas_to_compare.split(',')
+        schemas_to_compare = [f"'{item.strip()}'" for item in schemas_to_compare]
+        schemas_to_compare = ','.join(schemas_to_compare)
+
     report_format = args.format
     db_type = args.db_type
 
@@ -296,46 +236,64 @@ def main():
     if db_type == "bigquery":
         client = bigquery.Client(project=project_id)
     elif db_type == "postgres":
+        postgres_host = args.postgres_host
+        postgres_port = args.postgres_port
+        postgres_user = args.postgres_user
+        postgres_password = args.postgres_password
+        postgres_database = args.postgres_database
         conn = psycopg2.connect(
-            host=args.postgres_host,
-            port=args.postgres_port,
-            user=args.postgres_user,
-            password=args.postgres_password,
-            database=args.postgres_database,
+            host=postgres_host,
+            port=postgres_port,
+            user=postgres_user,
+            password=postgres_password,
+            database=postgres_database,
         )
         cursor = conn.cursor()
 
     # Get instance names
-    instance_names = get_instance_names(dataset_name, schema_name, table_name)
+    if db_type == "bigquery":
+        instances = client.query("SELECT DISTINCT PKEY FROM " + dataset_name + "." + table_name).result()
+        # Convert instances to a list
+        instance_names = [row[0] for row in instances]
+    elif db_type == "postgres":
+        cursor.execute(f"SELECT DISTINCT PKEY FROM {schema_name}.{table_name}")
+        instance_names = [row[0] for row in cursor.fetchall()]
 
+    # Assign instance names
     if len(instance_names) >= 2:
-        instance_1_name, instance_2_name = instance_names[:2]
+        instance_1_name = instance_names[0]
+        instance_2_name = instance_names[1]
         print("Instance 1:", instance_1_name)
         print("Instance 2:", instance_2_name)
-
-        # Load configuration and execute queries
-        with open(os.path.join(get_script_path(), CONFIG_FILE), "r") as f:
-            config = yaml.safe_load(f)
-        results = execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name)
-
-        # Generate report
-        if report_format == "text":
-            report = generate_text_report(config, results, instance_1_name, instance_2_name)
-            print(report)
-        elif report_format == "html":
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_file_name = f"database_comparison_report_{timestamp}.html"
-            report = generate_html_report(config, results, instance_1_name, instance_2_name)
-            with open(report_file_name, "w") as f:
-                f.write(report)
-            print(f"HTML report generated: {report_file_name}")
     else:
         print("Not enough instances found in the table.")
 
-    # Close database connection if necessary
+    # Load configuration and execute queries
+    script_dir = pathlib.Path(__file__).parent.resolve()
+    # Join the script's directory path with the relative path to config.yaml
+    config_file_path = script_dir / CONFIG_FILE  
+    with open(config_file_path, 'r') as f:
+        config = yaml.safe_load(f)
+    
+    results = execute_queries(config, schemas_to_compare, db_type, project_id, cursor)
+
+    # Generate report based on format
+    if report_format == "text":
+        report = generate_text_report(config, results, instance_1_name, instance_2_name)
+        print(report)
+    elif report_format == "html":
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_file_name = f"database_comparison_report_{timestamp}.html"
+        report = generate_html_report(config, results, instance_1_name, instance_2_name)
+        with open(report_file_name, "w") as f:
+            f.write(report)
+        print(f"HTML report generated: {report_file_name}")
+
+    # Close postgres connection if used
     if db_type == "postgres":
         cursor.close()
         conn.close()
+
 
 if __name__ == "__main__":
     main()

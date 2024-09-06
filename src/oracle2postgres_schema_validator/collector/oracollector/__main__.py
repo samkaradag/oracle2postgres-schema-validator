@@ -20,7 +20,7 @@ import zipfile
 import argparse
 import pathlib
 
-def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file):
+def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file, view_type='all'):
     """
     Extracts data from an Oracle database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
@@ -59,8 +59,11 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
+        sql = query["query"].replace("<view_type>", view_type)
+        if (view_type == 'user'):
+            sql = sql.replace('owner,\n', "'" + db_user + "' as owner,\n").replace("WHERE owner NOT IN ('SYS', 'SYSTEM')\n","").replace("GROUP BY owner, ",f"GROUP BY '{db_user}', ")
         print(f"Extracting: {query['name']}")
-        cur.execute(query["query"])
+        cur.execute(sql)
 
         # Fetch all rows from the query result
         rows = cur.fetchall()
@@ -101,10 +104,11 @@ def main():
     parser.add_argument('--host', type=str, help='Hostname of the Oracle database')
     parser.add_argument('--port', default='1521', type=str, help='Port number of the Oracle database')
     parser.add_argument('--service', type=str, help='Service name of the Oracle database')
+    parser.add_argument('--view_type', type=str, help='Type of catalog views either "all or "user"')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml")
+    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type)
 
 if __name__ == "__main__":
     main()
