@@ -58,8 +58,7 @@ queries:
         n.nspname AS OWNER,
         t.tgname AS trigger_name,
         -- CASE WHEN t.tgtype = 't' THEN 'ROW' ELSE 'STATEMENT' END AS trigger_type,
-        t.tgrelid::regclass AS base_table,
-        'table' as BASE_OBJECT_TYPE,
+        t.tgrelid::regclass AS table_name,
         t.tgenabled AS status,
         'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
       FROM pg_trigger AS t

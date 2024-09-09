@@ -1,6 +1,6 @@
 # Oracle to Postgres Database Comparison Utility
 
-This utility streamlines the process of comparing the schemas and code objects of Oracle and Postgres databases. This utility can be useful for heterogenous migrations from Oracle to Postgres or vice-versa to check whether all the objects i.e: PLSQL, tablec, indexes, views, columns, sequences are migrated. It leverages Google BigQuery for efficient data analysis and reporting.
+This utility streamlines the process of comparing the schemas and code objects of Oracle and Postgres databases. This utility can be useful for heterogenous migrations from Oracle to Postgres or vice-versa to check whether all the objects i.e: PLSQL, tablec, indexes, views, columns, sequences are migrated. It can leverage Google BigQuery or any Postgres database as a staging environment for efficient data analysis and reporting.
 
 ## Key Features
 
@@ -31,19 +31,11 @@ This utility streamlines the process of comparing the schemas and code objects o
    
 2. **Set Up Environment:**
 
-Required parameters:
-* ORACLE_CONN_STRING: Connection parameters (user, password, ip, service name) for the Source Oracle database(s).
-* Postgres Connection String: Connection parameters (user, password, ip, database name) for the Source Oracle database(s).
-* GOOGLE_APPLICATION_CREDENTIALS: Use gcloud auth application-default login (This is required if the staging area is BigQuery)
-* PROJECT_ID: Your Google Cloud project ID (This is required if the staging area is BigQuery).
-* DATASET_ID: The BigQuery dataset to use (Tool will create if it doesn't exist) (This is required if the staging area is BigQuery).
-* Postgres Staging environment: Seperate Postgres Database to store metadata if BigQuery will not be used for the same.
+    ## Client environment requirements:
 
-## Client environment requirements:
-
-* python3.9
-* Shell environment (CLI) to run python scripts.
-* Network connectivity to Oracle and Postgres instances and BigQuery APIs.
+    * python3.9
+    * Shell environment (CLI) to run python scripts.
+    * Network connectivity to Oracle and Postgres instances and BigQuery APIs.
 
 ## Usage
 * **Collect Metadata:**
@@ -71,8 +63,8 @@ Required parameters:
             GRANT SELECT ON all_sys_privs TO <db_user>;
 
         Execute the following command by putting your db connection settings. If you want to get all_* views use --view_type all, if you want to get user_* views use --view_type user:
-        ```bash 
-        oracollector --host oracle_ip_address --user db_user --password db_passwd --service oracle_service_name --view_type all
+            ```bash 
+            oracollector --host oracle_ip_address --user db_user --password db_passwd --service oracle_service_name --view_type all
 
     * Postgres Collect: 
         ```bash 
@@ -116,8 +108,8 @@ The generated reports will be saved in the reports directory.
 Contributions are welcome! Please feel free to open issues or submit pull requests.
 
    **Clone the Repository:**
-   ```bash
-   git clone https://github.com/samkaradag/oracle2postgres-schema-validator
+    ```bash
+    git clone https://github.com/samkaradag/oracle2postgres-schema-validator
 
 
 ## License
