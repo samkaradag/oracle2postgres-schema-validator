@@ -19,6 +19,8 @@ from google.cloud import bigquery
 from tabulate import tabulate
 import datetime
 import psycopg2
+import re
+
 
 # Configuration
 DEFAULT_PROJECT_ID = "your_project_id"
@@ -267,12 +269,16 @@ def main():
     global client, cursor, conn, db_type, project_id, dataset_name, table_name, schema_name, schemas_to_compare, report_format
 
     parser = argparse.ArgumentParser(description="Generate database comparison report.")
-    parser.add_argument("--project_id", help="Google Cloud project ID.")
-    parser.add_argument("--dataset_name", help="BigQuery dataset name.")
+    parser.add_argument("--dataset_id", help="BigQuery dataset name.")
     parser.add_argument("--table_name", help="BigQuery table name.")
     parser.add_argument("--format", default="text", choices=["text", "html"], help="Report format (text or html).")
     parser.add_argument("--db_type", default="bigquery", choices=["bigquery", "postgres"], help="Database type.")
-    parser.add_argument("--postgres_host", help="Postgres host.")
+   
+    group = parser.add_mutually_exclusive_group(required=True)  # Ensure one is chosen
+    group.add_argument("--postgres_connection_string", help="Connection string for your PostgreSQL database. Use this if the staging area is a postgres db. format: 'postgresql://username:pwd@ip_address/db_name'.")
+    group.add_argument("--postgres_host", help="Postgres host. Either use postgres_host or postgres_connection_string")
+    group.add_argument("--project_id", help="Google Cloud project ID.")
+    
     parser.add_argument("--postgres_port", type=int, help="Postgres port.")
     parser.add_argument("--postgres_user", help="Postgres user.")
     parser.add_argument("--postgres_password", help="Postgres password.")
@@ -283,7 +289,7 @@ def main():
 
     # Get configuration
     project_id = args.project_id or os.environ.get("PROJECT_ID") or DEFAULT_PROJECT_ID
-    dataset_name = args.dataset_name or os.environ.get("DATASET_NAME") or DEFAULT_DATASET_NAME
+    dataset_name = args.dataset_id or os.environ.get("DATASET_NAME") or DEFAULT_DATASET_NAME
     table_name = args.table_name or os.environ.get("TABLE_NAME") or DEFAULT_TABLE_NAME
     schema_name = args.schema_name or os.environ.get("SCHEMA_NAME") or DEFAULT_SCHEMA_NAME
     schemas_to_compare = args.schemas_to_compare or os.environ.get("SCHEMAS_TO_COMPARE")
@@ -296,13 +302,24 @@ def main():
     if db_type == "bigquery":
         client = bigquery.Client(project=project_id)
     elif db_type == "postgres":
-        conn = psycopg2.connect(
-            host=args.postgres_host,
-            port=args.postgres_port,
-            user=args.postgres_user,
-            password=args.postgres_password,
-            database=args.postgres_database,
-        )
+        if args.postgres_connection_string:
+            match = re.match(r"postgresql://([^:]+):([^@]+)@([^/]+)/(.+)", args.postgres_connection_string)
+            if match:
+                postgres_user, postgres_password, postgres_host, postgres_database = match.groups()
+                conn = psycopg2.connect(
+                    host=postgres_host,
+                    user=postgres_user,
+                    password=postgres_password,
+                    database=postgres_database,
+                )
+        elif args.postgres_host:
+            conn = psycopg2.connect(
+                host=args.postgres_host,
+                port=args.postgres_port,
+                user=args.postgres_user,
+                password=args.postgres_password,
+                database=args.postgres_database,
+            )
         cursor = conn.cursor()
 
     # Get instance names

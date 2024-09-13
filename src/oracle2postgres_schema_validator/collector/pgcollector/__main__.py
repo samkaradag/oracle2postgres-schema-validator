@@ -52,9 +52,14 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     # Create a cursor object
     cur = conn.cursor()
 
+    # Create the "extracts" directory if it doesn't exist
+    extracts_dir = os.path.join("./", "extracts")
+    os.makedirs(extracts_dir, exist_ok=True)
+
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
+        print(f"Extracting: {query['name']}")
         cur.execute(query["query"])
 
         # Fetch all rows from the query result
@@ -64,7 +69,7 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
         query_name = config['queries'][i].get('name', f"query_{i+1}")
 
         # Create a CSV file for the query results
-        csv_file = f"{query_name}.csv"
+        csv_file = os.path.join(extracts_dir, f"{query_name}.csv")
 
         with open(csv_file, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')
@@ -75,13 +80,27 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
             # Write the data rows
             writer.writerows(rows)
 
-    # Zip all the CSV files
-    zip_file = f"pg-extract-{db_host}.zip"
+    # # Zip all the CSV files
+    # zip_file = f"pg-extract-{db_host}.zip"
+    # with zipfile.ZipFile(zip_file, 'w') as z:
+    #     for filename in os.listdir():
+    #         if filename.endswith(".csv"):
+    #             z.write(filename)
+    #             os.remove(filename)
+
+    # Delete existing files starting with "orcl-extract-"
+    for filename in os.listdir(extracts_dir):
+        if filename.startswith("pg-extract-"):
+            os.remove(os.path.join(extracts_dir, filename))
+
+
+    # Zip all the CSV files in the "extracts" directory
+    zip_file = os.path.join(extracts_dir, f"pg-extract-{db_host}.zip")
     with zipfile.ZipFile(zip_file, 'w') as z:
-        for filename in os.listdir():
+        for filename in os.listdir(extracts_dir):
             if filename.endswith(".csv"):
-                z.write(filename)
-                os.remove(filename)
+                z.write(os.path.join(extracts_dir, filename), filename)
+                os.remove(os.path.join(extracts_dir, filename))
 
     # Close the cursor and connection
     cur.close()
