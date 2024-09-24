@@ -18,8 +18,8 @@ SELECT
   a.OWNER,
   a.TABLE_NAME,
   a.INDEX_NAME,
-  IF(i1.INDEX_NAME IS NULL, 'Missing', 'Present') AS instance_1_status,
-  IF(i2.INDEX_NAME IS NULL, 'Missing', 'Present') AS instance_2_status
+  IF(i1.INDEX_NAME IS NULL, 'Missing', 'Present') AS <instance_1_id>_status,
+  IF(i2.INDEX_NAME IS NULL, 'Missing', 'Present') AS <instance_2_id>_status
 FROM all_indexes a
 LEFT JOIN instance_indexes i1 ON a.OWNER = i1.OWNER AND a.TABLE_NAME = i1.TABLE_NAME AND a.INDEX_NAME = i1.INDEX_NAME  AND i1.instance_id = '<instance_1_id>'
 LEFT JOIN instance_indexes i2 ON a.OWNER = i2.OWNER AND a.TABLE_NAME = i2.TABLE_NAME AND a.INDEX_NAME = i2.INDEX_NAME  AND i2.instance_id = '<instance_2_id>'

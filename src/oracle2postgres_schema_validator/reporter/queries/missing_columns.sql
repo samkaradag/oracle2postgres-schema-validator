@@ -21,8 +21,8 @@ SELECT
   a.OWNER,
   a.TABLE_NAME,
   a.COLUMN_NAME,
-  CASE WHEN i1.COLUMN_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS instance_1_status,
-  CASE WHEN i2.COLUMN_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS instance_2_status
+  CASE WHEN i1.COLUMN_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS <instance_1_id>_status,
+  CASE WHEN i2.COLUMN_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS <instance_2_id>_status
 FROM all_columns a
 LEFT JOIN instance_columns i1 ON a.OWNER = i1.OWNER AND a.TABLE_NAME = i1.TABLE_NAME AND a.COLUMN_NAME = i1.COLUMN_NAME AND i1.instance_id = '<instance_1_id>'
 LEFT JOIN instance_columns i2 ON a.OWNER = i2.OWNER AND a.TABLE_NAME = i2.TABLE_NAME AND a.COLUMN_NAME = i2.COLUMN_NAME AND i2.instance_id = '<instance_2_id>'

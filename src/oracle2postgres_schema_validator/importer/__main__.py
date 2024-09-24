@@ -116,6 +116,20 @@ def load_csv_to_postgres(csv_directory, postgres_connection_string, dbschema):
     # Create schema if it doesn't exist
     with engine.begin() as conn:
         conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {dbschema}"))
+        # Retrieve a list of tables in the schema
+        result = conn.execute(text(f"""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = '{dbschema}'
+        """))
+        tables = [row[0] for row in result.fetchall()]
+
+        # Drop tables in a loop
+        for table in tables:
+            conn.execute(text(f"DROP TABLE IF EXISTS {dbschema}.{table}"))
+            print(f"Dropping already existing table in schema {dbschema}.{table}")
+        print(f"All tables in schema '{dbschema}' have been dropped.")
+
 
     Session = sessionmaker(bind=engine)
     session = Session()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "oracle2postgres_schema_validator"
-version = "0.1.4"
+version = "0.1.10"
 description = "Tool to compare Oracle objects with Postgres objects"
 authors = ["sametkaradag <sametkaradag@gmail.com>"]
 license = "Google"
@@ -9,7 +9,8 @@ packages = [
     {include = "importer", from = "src/oracle2postgres_schema_validator"},
     {include = "reporter", from = "src/oracle2postgres_schema_validator"},
     {include = "pgcollector", from = "src/oracle2postgres_schema_validator/collector"},
-    {include = "oracollector", from = "src/oracle2postgres_schema_validator/collector"}
+    {include = "oracollector", from = "src/oracle2postgres_schema_validator/collector"},
+    {include = "compare", from = "src/oracle2postgres_schema_validator"}
 ]
 
 
@@ -29,6 +30,7 @@ pgcollector = "pgcollector.__main__:main"
 oracollector = "oracollector.__main__:main"
 importer = "importer.__main__:main"
 reporter = "reporter.__main__:main"
+compare = "compare.__main__:main"
 
 [build-system]
 requires = ["poetry-core"]
