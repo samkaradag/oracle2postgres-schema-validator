@@ -2,7 +2,7 @@ queries:
   - name: "orcl__columns__data"
     query: |
       SELECT 
-          'oracle' AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID,
           owner,
           table_name,
@@ -20,13 +20,13 @@ queries:
   - name: "orcl__instances__data"
     query: |
       SELECT 
-          'oracle' AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID
       FROM dual
   - name: "orcl__views__data"
     query: |
       SELECT 
-          'oracle' AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID, 
           owner,
           view_name, 
@@ -37,7 +37,7 @@ queries:
   - name: "orcl__dbobjectnames__data" 
     query: |
       SELECT 
-          'oracle' AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID, 
           owner,
           object_name, 
@@ -50,7 +50,7 @@ queries:
   - name: "orcl__sourcecodedetailed__data" 
     query: |
       SELECT 
-          'oracle' AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID, a.*, 'Oracle' AS DMA_SOURCE_ID, 
           NULL AS DMA_MANUAL_ID 
           from (
@@ -65,7 +65,7 @@ queries:
   - name: "orcl__triggers__data" 
     query: |
       SELECT 
-          sys_context('userenv', 'current_schema')  AS PKEY,
+          'oracle<db-name>' AS PKEY,
           1 AS CON_ID,
           owner,
           trigger_name,

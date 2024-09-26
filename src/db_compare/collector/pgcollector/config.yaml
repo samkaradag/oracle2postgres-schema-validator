@@ -1,14 +1,14 @@
 queries:
   - name: "pgdb__columns__data"
-    query: "select 'postgres' AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
+    query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
   - name: "pgdb__instances__data"
-    query: "select 'postgres' AS PKEY,1 AS CON_ID;"
+    query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID;"
   - name: "pgdb__views__data"
-    query: "select 'postgres' AS PKEY,1 AS CON_ID, UPPER(table_schema) OWNER, UPPER(table_name) VIEW_NAME, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID from information_schema.views where table_schema not in ('pg_catalog','information_schema');"
+    query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID, UPPER(table_schema) OWNER, UPPER(table_name) VIEW_NAME, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID from information_schema.views where table_schema not in ('pg_catalog','information_schema');"
   - name: "pgdb__dbobjectnames__data" 
     query: | 
       SELECT
-          'postgres' AS PKEY,1 AS CON_ID,
+          'postgres<db-name>' AS PKEY,1 AS CON_ID,
           UPPER(n.nspname) AS OWNER,    -- Schema containing the object
           UPPER(c.relname) AS OBJECT_NAME, -- Object name
           CASE c.relkind 
@@ -33,7 +33,7 @@ queries:
   - name: "pgdb__sourcecodedetailed__data" 
     query: | 
       SELECT
-          'postgres' AS PKEY,1 AS CON_ID,
+          'postgres<db-name>' AS PKEY,1 AS CON_ID,
           UPPER(n.nspname) AS OWNER,
           UPPER(p.proname) AS NAME, -- Procedures and functions
           CASE p.prokind 
@@ -54,7 +54,7 @@ queries:
   - name: "pgdb__triggers__data" 
     query: | 
       SELECT 
-        'postgres' AS PKEY,1 AS CON_ID,
+        'postgres<db-name>' AS PKEY,1 AS CON_ID,
         n.nspname AS OWNER,
         t.tgname AS trigger_name,
         -- CASE WHEN t.tgtype = 't' THEN 'ROW' ELSE 'STATEMENT' END AS trigger_type,

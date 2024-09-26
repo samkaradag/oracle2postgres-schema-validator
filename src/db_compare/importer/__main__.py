@@ -152,6 +152,17 @@ def load_csv_to_postgres(csv_directory, postgres_connection_string, dbschema):
             except Exception as e:
                 print(e)
 
+def delete_files_in_directory(directory):
+    """Deletes all files in the specified directory."""
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {filename}")
+        except OSError as e:
+            print(f"Error deleting file {filename}: {e}")
+
 def main():
     parser = argparse.ArgumentParser(description="Load CSV files into BigQuery or PostgreSQL tables.")
     parser.add_argument("--project_id", help="Your Google Cloud Project ID (for BigQuery). Use this if the staging area is BigQuery.")
@@ -172,6 +183,8 @@ def main():
     if args.postgres_connection_string:
         load_csv_to_postgres(args.csv_directory, args.postgres_connection_string, args.schema)
 
+    # Delete files after successful import
+    delete_files_in_directory(args.csv_directory)
 
 if __name__ == "__main__":
     main()

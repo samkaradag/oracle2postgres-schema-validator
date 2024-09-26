@@ -1,7 +1,7 @@
 Instances: instances.sql
-Object Counts: object_counts.sql
 Mismatched Object Counts: object_counts_mismatch.sql
-Object Counts (per Schema): object_counts_per_schema.sql
+All Object Counts: object_counts.sql
+All Object Counts (per Schema): object_counts_per_schema.sql
 Mismatched Object Counts (per Schema): object_counts_per_schema_mismatch.sql
 Missing Objects: missing_objects.sql
 Missing Columns: missing_columns.sql

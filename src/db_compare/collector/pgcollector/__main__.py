@@ -13,28 +13,26 @@
 # limitations under the License.
 
 import yaml
-import oracledb
+import psycopg2
 import csv
 import os
 import zipfile
 import argparse
 import pathlib
 
-def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file, view_type='all'):
+def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     """
-    Extracts data from an Oracle database based on queries and connection settings
+    Extracts data from a Postgres database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
     and then zips all the CSV files.
 
     Args:
-        db_user: The username for the Oracle database.
-        db_password: The password for the Oracle database.
-        db_host: The hostname of the Oracle database.
-        db_port: The port number of the Oracle database.
-        db_service: The service name of the Oracle database.
+        db_host: The hostname of the Postgres database.
+        db_name: The name of the Postgres database.
+        db_user: The username for the Postgres database.
+        db_password: The password for the Postgres database.
         config_file: Path to the YAML configuration file.
     """
-
     # Load Configuration (Handle missing file gracefully)
     # Get the absolute path to the script's directory
     script_dir = pathlib.Path(__file__).parent.resolve()
@@ -43,14 +41,12 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
     with open(config_file_path, 'r') as f:
         config = yaml.safe_load(f)
 
-    # Construct the connection string
-    dsn = oracledb.makedsn(host=db_host, port=db_port, service_name=db_service)
-
     # Connect to the database
-    conn = oracledb.connect(
+    conn = psycopg2.connect(
+        host=db_host,
+        database=db_name,
         user=db_user,
-        password=db_password,
-        dsn=dsn
+        password=db_password
     )
 
     # Create a cursor object
@@ -59,13 +55,12 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
     # Create the "extracts" directory if it doesn't exist
     extracts_dir = os.path.join("./", "extracts")
     os.makedirs(extracts_dir, exist_ok=True)
-
+    db_host_alpha = ''.join(c for c in db_host if c.isalpha()) 
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
-        sql = query["query"].replace("<view_type>", view_type)
-        if (view_type == 'user'):
-            sql = sql.replace('owner,\n', "'" + db_user + "' as owner,\n").replace("WHERE owner NOT IN ('SYS', 'SYSTEM')\n","").replace("GROUP BY owner, ",f"GROUP BY '{db_user}', ")
+        sql = query["query"].replace("<db-name>",db_host_alpha)
+        
         print(f"Extracting: {query['name']}")
         cur.execute(sql)
 
@@ -87,14 +82,22 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
             # Write the data rows
             writer.writerows(rows)
 
+    # # Zip all the CSV files
+    # zip_file = f"pg-extract-{db_host}.zip"
+    # with zipfile.ZipFile(zip_file, 'w') as z:
+    #     for filename in os.listdir():
+    #         if filename.endswith(".csv"):
+    #             z.write(filename)
+    #             os.remove(filename)
+
     # Delete existing files starting with "orcl-extract-"
     for filename in os.listdir(extracts_dir):
-        if filename.startswith("orcl-extract-"):
+        if filename.startswith("pg-extract-"):
             os.remove(os.path.join(extracts_dir, filename))
 
 
     # Zip all the CSV files in the "extracts" directory
-    zip_file = os.path.join(extracts_dir, f"orcl-extract-{db_host}.zip")
+    zip_file = os.path.join(extracts_dir, f"pg-extract-{db_host}.zip")
     with zipfile.ZipFile(zip_file, 'w') as z:
         for filename in os.listdir(extracts_dir):
             if filename.endswith(".csv"):
@@ -108,17 +111,15 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
     print(f"Extracted data and saved to {zip_file}")
 
 def main():
-    parser = argparse.ArgumentParser(description='Extract data from an Oracle database')
-    parser.add_argument('--user', type=str, help='Username for the Oracle database')
-    parser.add_argument('--password', type=str, help='Password for the Oracle database')
-    parser.add_argument('--host', type=str, help='Hostname of the Oracle database')
-    parser.add_argument('--port', default='1521', type=str, help='Port number of the Oracle database')
-    parser.add_argument('--service', type=str, help='Service name of the Oracle database')
-    parser.add_argument('--view_type', type=str, help='Type of catalog views either "all or "user"')
+    parser = argparse.ArgumentParser(description='Extract data from a Postgres database')
+    parser.add_argument('--host', type=str, help='Hostname of the Postgres database')
+    parser.add_argument('--database', type=str, help='Name of the Postgres database')
+    parser.add_argument('--user', type=str, help='Username for the Postgres database')
+    parser.add_argument('--password', type=str, help='Password for the Postgres database')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type)
+    extract_queries_to_csv(args.host, args.database, args.user, args.password,"./config.yaml")
 
 if __name__ == "__main__":
     main()
