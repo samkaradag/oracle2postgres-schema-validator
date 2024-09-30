@@ -23,7 +23,7 @@ SELECT
   CASE WHEN i1.OBJECT_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS <instance_1_id>_status,
   CASE WHEN i2.OBJECT_NAME IS NULL THEN 'Missing' ELSE 'Present' END AS <instance_2_id>_status
 FROM all_objects a
-LEFT JOIN instance_objects i1 ON a.OWNER = i1.OWNER AND a.OBJECT_NAME = i1.OBJECT_NAME AND a.OBJECT_TYPE = i1.OBJECT_TYPE 
-LEFT JOIN instance_objects i2 ON a.OWNER = i2.OWNER AND a.OBJECT_NAME = i2.OBJECT_NAME AND a.OBJECT_TYPE = i2.OBJECT_TYPE
-WHERE (i1.OBJECT_NAME IS NULL OR i2.OBJECT_NAME IS NULL) AND i1.instance_id = '<instance_1_id>'  AND i2.instance_id = '<instance_2_id>' <a_schema_filter>
+LEFT JOIN instance_objects i1 ON a.OWNER = i1.OWNER AND a.OBJECT_NAME = i1.OBJECT_NAME AND a.OBJECT_TYPE = i1.OBJECT_TYPE AND i1.instance_id = '<instance_1_id>'
+LEFT JOIN instance_objects i2 ON a.OWNER = i2.OWNER AND a.OBJECT_NAME = i2.OBJECT_NAME AND a.OBJECT_TYPE = i2.OBJECT_TYPE  AND i2.instance_id = '<instance_2_id>'
+WHERE (i1.OBJECT_NAME IS NULL OR i2.OBJECT_NAME IS NULL)   <a_schema_filter>
 ORDER BY a.OBJECT_TYPE, a.OBJECT_NAME;

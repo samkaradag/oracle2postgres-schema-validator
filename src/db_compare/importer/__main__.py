@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 from sqlalchemy import text
-
+import shutil
 
 # Base = declarative_base()
 
@@ -154,14 +154,27 @@ def load_csv_to_postgres(csv_directory, postgres_connection_string, dbschema):
 
 def delete_files_in_directory(directory):
     """Deletes all files in the specified directory."""
+
+    archives_dir = os.path.join(directory, 'archives')
+    
+    # Create the 'archives' directory if it doesn't exist
+    if not os.path.exists(archives_dir):
+        os.makedirs(archives_dir)
+
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         try:
             if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"Deleted file: {filename}")
+                if filename.endswith('.zip'):
+                    # Move zip files to the 'archives' directory
+                    shutil.move(file_path, archives_dir)
+                    print(f"Moved file: {filename} to archives")
+                else:
+                    # Delete other files
+                    os.remove(file_path)
+                    print(f"Deleted file: {filename}")
         except OSError as e:
-            print(f"Error deleting file {filename}: {e}")
+            print(f"Error moving or deleting file {filename}: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description="Load CSV files into BigQuery or PostgreSQL tables.")
