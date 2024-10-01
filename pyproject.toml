@@ -1,16 +1,16 @@
 [tool.poetry]
-name = "oracle2postgres_schema_validator"
-version = "0.1.10"
-description = "Tool to compare Oracle objects with Postgres objects"
+name = "db_compare"
+version = "0.1.12"
+description = "Tool to compare database schema and objects"
 authors = ["sametkaradag <sametkaradag@gmail.com>"]
 license = "Google"
 readme = "README.md"
 packages = [
-    {include = "importer", from = "src/oracle2postgres_schema_validator"},
-    {include = "reporter", from = "src/oracle2postgres_schema_validator"},
-    {include = "pgcollector", from = "src/oracle2postgres_schema_validator/collector"},
-    {include = "oracollector", from = "src/oracle2postgres_schema_validator/collector"},
-    {include = "compare", from = "src/oracle2postgres_schema_validator"}
+    {include = "importer", from = "src/db_compare"},
+    {include = "reporter", from = "src/db_compare"},
+    {include = "pgcollector", from = "src/db_compare/collector"},
+    {include = "oracollector", from = "src/db_compare/collector"},
+    {include = "compare", from = "src/db_compare"}
 ]
 
 
