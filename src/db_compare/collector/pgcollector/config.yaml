@@ -1,6 +1,31 @@
 queries:
   - name: "pgdb__columns__data"
-    query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
+    query: |
+      SELECT 
+        'postgres<db-name>' AS PKEY,
+        1 AS CON_ID, 
+        UPPER(c.table_schema) AS OWNER, 
+        UPPER(c.table_name) AS TABLE_NAME, 
+        UPPER(c.column_name) AS COLUMN_NAME, 
+        UPPER(c.data_type) AS DATA_TYPE, 
+        c.character_maximum_length AS DATA_LENGTH, 
+        c.numeric_precision AS DATA_PRECISION, 
+        c.numeric_scale AS DATA_SCALE, 
+        c.is_nullable AS NULLABLE, 
+        'Postgres' AS DMA_SOURCE_ID, 
+        NULL AS DMA_MANUAL_ID
+      FROM 
+        information_schema.columns c
+      JOIN 
+        pg_class cl ON cl.relname = c.table_name 
+      JOIN 
+        pg_namespace ns ON ns.oid = cl.relnamespace
+      LEFT JOIN 
+        pg_inherits inh ON inh.inhrelid = cl.oid
+      WHERE 
+        c.table_schema NOT IN ('pg_catalog', 'information_schema')
+        AND inh.inhrelid IS NULL;
+# "select 'postgres<db-name>' AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
   - name: "pgdb__instances__data"
     query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID;"
   - name: "pgdb__views__data"

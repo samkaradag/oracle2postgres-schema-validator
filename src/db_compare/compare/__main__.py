@@ -37,11 +37,13 @@ def main():
     oracle_group.add_argument('--oracle_password1', help='Oracle database 1 password')
     oracle_group.add_argument('--oracle_port1', default='1521', type=str, help='Oracle database 1 port')
     oracle_group.add_argument('--oracle_service1', help='Oracle database 1 service name (optional)')
+    oracle_group.add_argument('--oracle_protocol1',default='tcp', help='Oracle database 1 protocol (tcp or tcps) (optional)')
     oracle_group.add_argument('--oracle_host2', help='Oracle database 2 hostname (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_user2', help='Oracle database 2 username (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_password2', help='Oracle database 2 password (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_port2', default='1521', type=str, help='Oracle database 2 port (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_service2', help='Oracle database 2 service name (optional, for oracle_to_oracle)')
+    oracle_group.add_argument('--oracle_protocol2' , default='tcp' , help='Oracle database 2 protocol (tcp or tcps) (optional)')
     oracle_group.add_argument('--oracle_view_type', default='user', choices=['user', 'all'], help='Type of views to collect (user or all)')
 
 
@@ -99,7 +101,7 @@ def main():
         print("Extracting Oracle metadata...")
         # Call oracollector
         subprocess.run(["python", "-m", "oracollector", "--user", args.oracle_user1, "--password", args.oracle_password1,
-                        "--host", args.oracle_host1, "--port", args.oracle_port1, "--service", args.oracle_service1, 
+                        "--host", args.oracle_host1, "--port", args.oracle_port1, "--service", args.oracle_service1, "--protocol", args.oracle_protocol1,
                         "--view_type", args.oracle_view_type])
         print("Extracting Postgres metadata...")
         
@@ -112,7 +114,7 @@ def main():
         #  Oracle to Oracle comparison
         for i in [1, 2]:
             subprocess.run(["python", "-m", "oracollector", "--user", getattr(args, f"oracle_user{i}"), "--password", getattr(args, f"oracle_password{i}"),
-                          "--host", getattr(args, f"oracle_host{i}"), "--port", getattr(args, f"oracle_port{i}"), "--service", getattr(args, f"oracle_service{i}"),
+                          "--host", getattr(args, f"oracle_host{i}"), "--port", getattr(args, f"oracle_port{i}"), "--service", getattr(args, f"oracle_service{i}"),  "--protocol", getattr(args, f"oracle_service{i}"),
                           "--view_type", args.oracle_view_type]) # Using f-strings to dynamically construct argument names
 
     elif args.postgres_to_postgres:

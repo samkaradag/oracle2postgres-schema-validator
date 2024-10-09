@@ -91,6 +91,18 @@ compare --oracle_to_postgres \
 --staging_schema schema_compare --format html --schemas_to_compare 'SCHEMA1,SCHEMA2'
 ```
 
+**Example (Oracle to Oracle, Postgres Staging):**
+
+(Please note that Staging environment can be postgres or bigquery independent of the comparison mode)
+
+```bash
+compare --oracle_to_oracle \
+--oracle_host1 <oracle_host1> --oracle_user1 <oracle_user1> --oracle_password1 <oracle_password> --oracle_service1 <oracle_service> \
+--oracle_host2 <oracle_host2> --oracle_user2 <oracle_user2> --oracle_password2 <oracle_password> --oracle_service2 <oracle_service> \
+--staging_postgres_connection_string "postgresql://<staging_user>:<staging_password>@<staging_host>/<staging_database>" \
+--staging_schema schema_compare --format html --schemas_to_compare 'SCHEMA1,SCHEMA2'
+```
+
 **Example (Oracle to Oracle, BigQuery Staging):**
 
 (Please note that Staging environment can be postgres or bigquery independent of the comparison mode)

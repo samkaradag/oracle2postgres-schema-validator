@@ -20,7 +20,7 @@ import zipfile
 import argparse
 import pathlib
 
-def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file, view_type='all'):
+def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file, view_type='all', protocol='tcp'):
     """
     Extracts data from an Oracle database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
@@ -50,7 +50,8 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
     conn = oracledb.connect(
         user=db_user,
         password=db_password,
-        dsn=dsn
+        dsn=dsn,
+        protocol=protocol
     )
 
     # Create a cursor object
@@ -115,10 +116,11 @@ def main():
     parser.add_argument('--port', default='1521', type=str, help='Port number of the Oracle database')
     parser.add_argument('--service', type=str, help='Service name of the Oracle database')
     parser.add_argument('--view_type', type=str, help='Type of catalog views either "all or "user"')
+    parser.add_argument('--protocol', default='tcp', type=str, help='Protocol either "tcp" or "tcps"')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type)
+    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type, args.protocol)
 
 if __name__ == "__main__":
     main()
