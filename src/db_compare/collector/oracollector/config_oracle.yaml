@@ -40,11 +40,17 @@ queries:
           'oracle<db-name>' AS PKEY,
           1 AS CON_ID, 
           owner,
-          object_name, 
-          object_type,
+          CASE 
+              WHEN object_type = 'TABLE PARTITION'  THEN SUBOBJECT_NAME
+              ELSE object_name 
+          END AS object_name,
+          CASE 
+              WHEN object_type = 'TABLE' AND EXISTS (SELECT 1 FROM <view_type>_TAB_PARTITIONS WHERE table_owner = o.owner AND table_name = o.object_name) THEN 'PARTITIONED TABLE' 
+              ELSE object_type 
+          END AS object_type,
           'Oracle' AS DMA_SOURCE_ID, 
           NULL AS DMA_MANUAL_ID 
-      FROM <view_type>_objects
+      FROM <view_type>_objects o
       WHERE owner NOT IN ('SYS', 'SYSTEM')
       ORDER BY owner, object_type, object_name
   - name: "orcl__sourcecodedetailed__data" 

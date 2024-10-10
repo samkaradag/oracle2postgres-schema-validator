@@ -38,11 +38,15 @@ def main():
     oracle_group.add_argument('--oracle_port1', default='1521', type=str, help='Oracle database 1 port')
     oracle_group.add_argument('--oracle_service1', help='Oracle database 1 service name (optional)')
     oracle_group.add_argument('--oracle_protocol1',default='tcp', help='Oracle database 1 protocol (tcp or tcps) (optional)')
+    oracle_group.add_argument('--oracle_tns1', help='TNS name (alias) (alternative to --host, --port, --service)')
+    oracle_group.add_argument('--oracle_tns_path1', help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_host2', help='Oracle database 2 hostname (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_user2', help='Oracle database 2 username (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_password2', help='Oracle database 2 password (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_port2', default='1521', type=str, help='Oracle database 2 port (required for oracle_to_oracle)')
     oracle_group.add_argument('--oracle_service2', help='Oracle database 2 service name (optional, for oracle_to_oracle)')
+    oracle_group.add_argument('--oracle_tns2', help='TNS name (alias) (alternative to --host, --port, --service)')
+    oracle_group.add_argument('--oracle_tns_path2', help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_protocol2' , default='tcp' , help='Oracle database 2 protocol (tcp or tcps) (optional)')
     oracle_group.add_argument('--oracle_view_type', default='user', choices=['user', 'all'], help='Type of views to collect (user or all)')
 
@@ -100,35 +104,65 @@ def main():
     if args.oracle_to_postgres:
         print("Extracting Oracle metadata...")
         # Call oracollector
-        subprocess.run(["python", "-m", "oracollector", "--user", args.oracle_user1, "--password", args.oracle_password1,
-                        "--host", args.oracle_host1, "--port", args.oracle_port1, "--service", args.oracle_service1, "--protocol", args.oracle_protocol1,
-                        "--view_type", args.oracle_view_type])
+        for i in [1]:
+            if getattr(args, f"oracle_tns{i}"):
+                arguments = ["--tns", getattr(args, f"oracle_tns{i}"), "--tns_path", getattr(args, f"oracle_tns_path{i}")]
+            else:
+                arguments = ["--host", getattr(args, f"oracle_host{i}"), "--port", str(getattr(args, f"oracle_port{i}")),  #Convert port to string
+                            "--service", getattr(args, f"oracle_service{i}")] # Removed redundant --protocol
+
+            command = ["python", "-m", "oracollector", "--user", args.oracle_user1, "--password", args.oracle_password1]
+            command.extend(arguments)  # Add arguments to the main command list
+            command.extend(["--view_type", args.oracle_view_type])
+
+            try:
+                subprocess.run(command, check=True) #check=True raises exception on error, capture_output for better error messages
+                print("Oracle metadata extraction successful.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error extracting Oracle metadata: {e.stderr}")
+
         print("Extracting Postgres metadata...")
         
         # Call pgcollector
         subprocess.run(["python", "-m", "pgcollector", "--host", args.postgres_host1, "--database", args.postgres_database1,
-                        "--user", args.postgres_user1, "--password", args.postgres_password1])
+                        "--user", args.postgres_user1, "--password", args.postgres_password1], check=True)
         print("Loading metadata into staging area...")
     
     elif args.oracle_to_oracle:
         #  Oracle to Oracle comparison
         for i in [1, 2]:
-            subprocess.run(["python", "-m", "oracollector", "--user", getattr(args, f"oracle_user{i}"), "--password", getattr(args, f"oracle_password{i}"),
-                          "--host", getattr(args, f"oracle_host{i}"), "--port", getattr(args, f"oracle_port{i}"), "--service", getattr(args, f"oracle_service{i}"),  "--protocol", getattr(args, f"oracle_service{i}"),
-                          "--view_type", args.oracle_view_type]) # Using f-strings to dynamically construct argument names
+            try:
+                if getattr(args, f"oracle_tns{i}"):
+                    arguments = ["--tns", getattr(args, f"oracle_tns{i}"), "--tns_path", getattr(args, f"oracle_tns_path{i}")]
+                else:
+                    arguments = ["--host", getattr(args, f"oracle_host{i}"), "--port", str(getattr(args, f"oracle_port{i}")), "--service", getattr(args, f"oracle_service{i}")] # Removed redundant --protocol
+
+                command = ["python", "-m", "oracollector",
+                        "--user", getattr(args, f"oracle_user{i}"),
+                        "--password", getattr(args, f"oracle_password{i}"),
+                        "--view_type", args.oracle_view_type]
+                command.extend(arguments)
+
+                subprocess.run(command, check=True)
+                # print(f"Oracle metadata extraction successful for connection {i}.")
+
+            except AttributeError as e:
+                print(f"Missing argument for connection {i}: {e}")
+            except subprocess.CalledProcessError as e:
+                print(f"Error extracting Oracle metadata for connection {i}: {e.stderr}")
 
     elif args.postgres_to_postgres:
          # Postgres to Postgres comparison
         for i in [1, 2]:
             subprocess.run(["python", "-m", "pgcollector", "--host", getattr(args, f"postgres_host{i}"), "--database", getattr(args, f"postgres_database{i}"),
-                          "--user", getattr(args, f"postgres_user{i}"), "--password", getattr(args, f"postgres_password{i}"), "--port", getattr(args, f"postgres_port{i}")])
+                          "--user", getattr(args, f"postgres_user{i}"), "--password", getattr(args, f"postgres_password{i}"), "--port", getattr(args, f"postgres_port{i}")], check=True)
 
     # Call importer
     if args.staging_project_id:
-        subprocess.run(["python", "-m", "importer", "--project_id", args.staging_project_id, "--dataset_id", args.staging_dataset_id])
+        subprocess.run(["python", "-m", "importer", "--project_id", args.staging_project_id, "--dataset_id", args.staging_dataset_id], check=True)
     elif args.staging_postgres_connection_string:
         subprocess.run(["python", "-m", "importer", "--postgres_connection_string", args.staging_postgres_connection_string,
-                      "--schema", args.staging_schema])
+                      "--schema", args.staging_schema], check=True)
     else:
         logging.error('Please specify either staging_project_id and staging_dataset_id for BigQuery or staging_postgres_connection_string for Postgres')
         return
@@ -137,10 +171,10 @@ def main():
     # Call reporter
     if args.staging_project_id:
         subprocess.run(["python", "-m", "reporter", "--db_type", "bigquery", "--project_id", args.staging_project_id,
-                      "--dataset_id", args.staging_dataset_id, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format])
+                      "--dataset_id", args.staging_dataset_id, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format], check=True)
     elif args.staging_postgres_connection_string:
         subprocess.run(["python", "-m", "reporter", "--db_type", "postgres", "--postgres_connection_string", args.staging_postgres_connection_string,
-                      "--schema_name", args.staging_schema, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format])
+                      "--schema_name", args.staging_schema, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format], check=True)
     else:
         logging.error('Please specify either project_id and dataset_id for BigQuery or connection_string for Postgres')
         return

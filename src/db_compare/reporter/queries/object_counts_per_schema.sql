@@ -27,7 +27,7 @@ object_counts_with_instance_ids AS (
         ii.rn
     FROM object_counts oc
     JOIN instance_ids ii ON oc.instance_id = ii.instance_id
-    WHERE oc.OBJECT_TYPE NOT IN ('TABLE PARTITION')
+    -- WHERE oc.OBJECT_TYPE NOT IN ('TABLE PARTITION')
 )
 SELECT
   OWNER,

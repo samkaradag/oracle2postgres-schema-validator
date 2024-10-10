@@ -1,0 +1,133 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>Database Comparison Report</title>
+    <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+      }
+      
+      h2 {
+        color: #2980b9;
+        text-align: center;
+        margin-bottom: 1em;
+      }
+      
+      h3 {
+        color: #3498db;
+        margin-top: 2em;
+        margin-bottom: 1em;
+      }
+      
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        text-align: center;
+        margin-bottom: 2em;
+      }
+      
+      li {
+        display: inline-block;
+        margin: 0 1em;
+      }
+      
+      a {
+        color: #2980b9;
+        text-decoration: none;
+      }
+      
+      a:hover {
+        text-decoration: underline;
+      }
+      
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 2em;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      
+      th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+      }
+      
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      
+      tr:hover {
+        background-color: #e0e0e0;
+      }
+      
+      .missing {
+        color: #c0392b;
+        font-weight: bold;
+      }
+      
+      .present {
+        color: #2ecc71;
+        font-weight: bold;
+      }
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none; /* Hidden by default */
+        background-color: #007bff; /* Blue background */
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .back-to-top:hover {
+        background-color: #0056b3;
+    }
+    .back-to-top i { /* Style the arrow icon */
+        font-size: 1.2em;
+        line-height: 1;
+    }
+    </style>
+    </head>
+    <body>
+    <h2>Database Comparison Report</h2>
+    <ul>
+    <li><a href='#Instances'>Instances</a></li><li><a href='#Mismatched_Object_Counts'>Mismatched Object Counts</a></li><li><a href='#All_Object_Counts'>All Object Counts</a></li><li><a href='#All_Object_Counts_(per_Schema)'>All Object Counts (per Schema)</a></li><li><a href='#Mismatched_Object_Counts_(per_Schema)'>Mismatched Object Counts (per Schema)</a></li><li><a href='#Missing_Objects'>Missing Objects</a></li><li><a href='#Missing_Columns'>Missing Columns</a></li><li><a href='#Missing_PLSQL'>Missing PLSQL</a></li></ul><h3><a name='Instances'></a>Instances</h3><table><thead><tr><th>instance_id</th></tr></thead><tbody><tr><td>oracle</td></tr><tr><td>postgres</td></tr></tbody></table><h3><a name='Mismatched_Object_Counts'></a>Mismatched Object Counts</h3><table><thead><tr><th>owner</th><th>object_type</th><th>oracle_count</th><th>postgres_count</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>INDEX</td><td>23</td><td>27</td></tr><tr><td>MOCKSCHEMA</td><td>PARTITIONED TABLE</td><td>2</td><td>1</td></tr><tr><td>MOCKSCHEMA</td><td>SEQUENCE</td><td>3</td><td>10</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE</td><td>17</td><td>15</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE PARTITION</td><td>10</td><td>11</td></tr><tr><td>MOCKSCHEMA</td><td>TYPE</td><td>1</td><td>0</td></tr><tr><td>MOCKSCHEMA</td><td>VIEW</td><td>12</td><td>5</td></tr></tbody></table><h3><a name='All_Object_Counts'></a>All Object Counts</h3><table><thead><tr><th>owner</th><th>object_type</th><th>oracle_count</th><th>postgres_count</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>INDEX</td><td>23</td><td>27</td></tr><tr><td>MOCKSCHEMA</td><td>PARTITIONED TABLE</td><td>2</td><td>1</td></tr><tr><td>MOCKSCHEMA</td><td>SEQUENCE</td><td>3</td><td>10</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE</td><td>17</td><td>15</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE PARTITION</td><td>10</td><td>11</td></tr><tr><td>MOCKSCHEMA</td><td>TYPE</td><td>1</td><td>0</td></tr><tr><td>MOCKSCHEMA</td><td>VIEW</td><td>12</td><td>5</td></tr></tbody></table><h3><a name='All_Object_Counts_(per_Schema)'></a>All Object Counts (per Schema)</h3><table><thead><tr><th>owner</th><th>object_type</th><th>oracle_count</th><th>postgres_count</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>INDEX</td><td>23</td><td>27</td></tr><tr><td>MOCKSCHEMA</td><td>PARTITIONED TABLE</td><td>2</td><td>1</td></tr><tr><td>MOCKSCHEMA</td><td>SEQUENCE</td><td>3</td><td>10</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE</td><td>17</td><td>15</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE PARTITION</td><td>10</td><td>11</td></tr><tr><td>MOCKSCHEMA</td><td>TYPE</td><td>1</td><td>0</td></tr><tr><td>MOCKSCHEMA</td><td>VIEW</td><td>12</td><td>5</td></tr></tbody></table><h3><a name='Mismatched_Object_Counts_(per_Schema)'></a>Mismatched Object Counts (per Schema)</h3><table><thead><tr><th>owner</th><th>object_type</th><th>oracle_count</th><th>postgres_count</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>INDEX</td><td>23</td><td>27</td></tr><tr><td>MOCKSCHEMA</td><td>PARTITIONED TABLE</td><td>2</td><td>1</td></tr><tr><td>MOCKSCHEMA</td><td>SEQUENCE</td><td>3</td><td>10</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE</td><td>17</td><td>15</td></tr><tr><td>MOCKSCHEMA</td><td>TABLE PARTITION</td><td>10</td><td>11</td></tr><tr><td>MOCKSCHEMA</td><td>TYPE</td><td>1</td><td>0</td></tr><tr><td>MOCKSCHEMA</td><td>VIEW</td><td>12</td><td>5</td></tr></tbody></table><h3><a name='Missing_Objects'></a>Missing Objects</h3><table><thead><tr><th>owner</th><th>object_name</th><th>object_type</th><th>oracle_status</th><th>postgres_status</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>IDX_TEST_FUNCTIONAL_INDEX_1</td><td>INDEX</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>IDX_TEST_FUNCTIONAL_INDEX_2</td><td>INDEX</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_DEST_TAB_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_EMPLOYEES_BKP_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_LOGGING_TABLE_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_SAMPLE_NUMBER_DATA_TYPE_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_TBL_TEST_FUNCTIONAL_INDEX_1_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MOCKSCHEMA_TBL_TEST_FUNCTIONAL_INDEX_2_PK_ROWID</td><td>INDEX</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS2</td><td>PARTITIONED TABLE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>DEST_TAB_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>EMPLOYEES_BKP_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>LOGGING_TABLE_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_ORDER_ID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>SAMPLE_NUMBER_DATA_TYPE_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>TBL_TEST_FUNCTIONAL_INDEX_1_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>TBL_TEST_FUNCTIONAL_INDEX_2_ROWID_SEQ</td><td>SEQUENCE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>MY_TEMP_TABLE</td><td>TABLE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>TBL_DATA_TYPE_TEST</td><td>TABLE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2022</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2022</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2023</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2023</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202301</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202302</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202303</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202304</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202305</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202306</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202307</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202308</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202309</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_202310</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2024</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2024</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2025</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_2025</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_DEFAULT</td><td>TABLE PARTITION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_FUTURE</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS_FUTURE</td><td>TABLE PARTITION</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>STRINGS_T</td><td>TYPE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_LISTAGG_DISTINCT</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_1</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_2</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>VIEW</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_TABLE_FUNCTION_ORACLE</td><td>VIEW</td><td>Present</td><td>Missing</td></tr></tbody></table><h3><a name='Missing_Columns'></a>Missing Columns</h3><table><thead><tr><th>owner</th><th>table_name</th><th>column_name</th><th>oracle_status</th><th>postgres_status</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>DEST_TAB</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>EMP_DETAILS_VIEW</td><td>DEPARTME
+NT_NAME</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>EMP_DETAILS_VIEW</td><td>DEPARTMENT_NAME</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>EMPLOYEES_BKP</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>LOGGING_TABLE</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>Day-Month-Year</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>DAY-MONTH-YEAR</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>ISO Year and Week of Year</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>ISO YEAR AND WEEK OF YEAR</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>Month Name</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>MONTH NAME</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>Original Date</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>ORIGINAL DATE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>Time in 24-hr format</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>TIME IN 24-HR FORMAT</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>Year</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_DATE</td><td>YEAR</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>CHAR_N</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>Hexadecimal Value</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>Input Number N</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>MONETARY</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>Number with Commas</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>Scientific Notation</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TO_CHAR_NUM</td><td>Zero_padded Number</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Date, time removed</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>DATE, TIME REMOVED</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Nearest Minute</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>NEAREST MINUTE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Original Date</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>ORIGINAL DATE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Start of Month</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>START OF MONTH</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Start of Week</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>START OF WEEK</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>Start of Year</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>ORACLE_TRUNC_DATE</td><td>START OF YEAR</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>ORDERS</td><td>AMOUNT</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>SAMPLE_NUMBER_DATA_TYPE</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>TBL_TEST_FUNCTIONAL_INDEX_1</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>TBL_TEST_FUNCTIONAL_INDEX_2</td><td>ROWID</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>VW_LISTAGG_DISTINCT</td><td>DEPARTMENT_ID</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_LISTAGG_DISTINCT</td><td>MEMBERS</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>dt</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Dy</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Hr</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Mi</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Sec</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Tdy</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Thr</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Tmi</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_ORA_FUNC</td><td>Tsec</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_1</td><td>BRONZE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_1</td><td>GOLD</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_1</td><td>NOC</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_1</td><td>SILVER</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_2</td><td>BRONZE</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_2</td><td>GOLD</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_2</td><td>NOC</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_PIVOT_2</td><td>SILVER</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>1stNumString</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>CASE_INSENSITIVE_E</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>CASE_SENSITIVE_a</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>FirstNumber</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>IS_A_VALID_EMAIL</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>ReplaceNumber</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_REGEX_ORACLE</td><td>STR</td><td>Present</td><td>Missing</td></tr><tr><td>MOCKSCHEMA</td><td>VW_TABLE_FUNCTION_ORACLE</td><td>MY_STRING</td><td>Present</td><td>Missing</td></tr></tbody></table><h3><a name='Missing_PLSQL'></a>Missing PLSQL</h3><table><thead><tr><th>owner</th><th>name</th><th>type</th><th>oracle_status</th><th>postgres_status</th></tr></thead><tbody><tr><td>MOCKSCHEMA</td><td>GET_FIRST_NAME</td><td>FUNCTION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>GET_FULL_NAME</td><td>FUNCTION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>GET_LAST_NAME</td><td>FUNCTION</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>GENERATE_RANDOM_DATA</td><td>PROCEDURE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>GENERATE_RANDOMIZER_99</td><td>PROCEDURE</td><td>Missing</td><td>Present</td></tr><tr><td>MOCKSCHEMA</td><td>STRINGS_T</td><td>TYPE</td><td>Present</td><td>Missing</td></tr></tbody></table>
+    <button class="back-to-top"><i class="fas fa-arrow-up"></i></button>
+    <script>
+        // Get the button element
+        const backToTopButton = document.querySelector(".back-to-top");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        };
+
+        // When the user clicks on the button, scroll to the top of the document
+        backToTopButton.addEventListener("click", function() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        });
+    </script>
+    </body>
+    </html>
+    

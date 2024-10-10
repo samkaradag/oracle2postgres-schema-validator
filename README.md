@@ -103,6 +103,15 @@ compare --oracle_to_oracle \
 --staging_schema schema_compare --format html --schemas_to_compare 'SCHEMA1,SCHEMA2'
 ```
 
+**Example (Oracle to Oracle, Postgres Staging, using tns):**
+```bash
+compare --oracle_to_oracle \
+--oracle_tns1 <oracle_tns_alias1> --oracle_tns_path1 <tnsnames.ora_path_1> \
+--oracle_tns2 <oracle_tns_alias2> --oracle_tns_path2 <tnsnames.ora_path_2> \
+--staging_postgres_connection_string "postgresql://<staging_user>:<staging_password>@<staging_host>/<staging_database>" \
+--staging_schema schema_compare --format html --schemas_to_compare 'SCHEMA1,SCHEMA2'
+```
+
 **Example (Oracle to Oracle, BigQuery Staging):**
 
 (Please note that Staging environment can be postgres or bigquery independent of the comparison mode)

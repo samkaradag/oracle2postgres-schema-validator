@@ -20,7 +20,7 @@ import zipfile
 import argparse
 import pathlib
 
-def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, config_file, view_type='all', protocol='tcp'):
+def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, tns, tns_path, config_file, view_type='all', protocol='tcp'):
     """
     Extracts data from an Oracle database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
@@ -44,15 +44,23 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
         config = yaml.safe_load(f)
 
     # Construct the connection string
-    dsn = oracledb.makedsn(host=db_host, port=db_port, service_name=db_service)
-
-    # Connect to the database
-    conn = oracledb.connect(
-        user=db_user,
-        password=db_password,
-        dsn=dsn,
-        protocol=protocol
-    )
+    if tns:
+        dsn = tns
+        conn = oracledb.connect(
+            user=db_user,
+            password=db_password,
+            dsn=dsn,
+            config_dir=tns_path
+        )
+    else:
+        dsn = oracledb.makedsn(host=db_host, port=db_port, service_name=db_service)
+         # Connect to the database
+        conn = oracledb.connect(
+            user=db_user,
+            password=db_password,
+            dsn=dsn,
+            protocol=protocol
+        )
 
     # Create a cursor object
     cur = conn.cursor()
@@ -66,7 +74,7 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, c
         # Execute the query
         sql = query["query"].replace("<view_type>", view_type).replace("<db-name>",db_host_alpha)
         if (view_type == 'user'):
-            sql = sql.replace('owner,\n', "'" + db_user + "' as owner,\n").replace("WHERE owner NOT IN ('SYS', 'SYSTEM')\n","").replace("GROUP BY owner, ",f"GROUP BY '{db_user}', ")
+            sql = sql.replace('owner,\n', "'" + db_user + "' as owner,\n").replace("WHERE owner NOT IN ('SYS', 'SYSTEM')\n","").replace("GROUP BY owner, ",f"GROUP BY '{db_user}', ").replace('table_owner = o.owner AND','')
         print(f"Extracting: {query['name']}")
         cur.execute(sql)
 
@@ -115,12 +123,24 @@ def main():
     parser.add_argument('--host', type=str, help='Hostname of the Oracle database')
     parser.add_argument('--port', default='1521', type=str, help='Port number of the Oracle database')
     parser.add_argument('--service', type=str, help='Service name of the Oracle database')
+    parser.add_argument('--tns', type=str, help='TNS name (alias) (alternative to --host, --port, --service)')
+    parser.add_argument('--tns_path', type=str, help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
+    
     parser.add_argument('--view_type', type=str, help='Type of catalog views either "all or "user"')
     parser.add_argument('--protocol', default='tcp', type=str, help='Protocol either "tcp" or "tcps"')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type, args.protocol)
+    # Determine connection method based on provided arguments.
+    if args.tns:
+      extract_queries_to_csv(args.user, args.password, None, None, None, args.tns, args.tns_path, "./config_oracle.yaml", args.view_type, args.protocol)
+    elif args.host and args.port and args.service:
+      extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, None, None, "./config_oracle.yaml", args.view_type, args.protocol)
+    else:
+      print("Error: Please provide either --tns OR --host, --port, and --service.")
+
+
+    # extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type, args.protocol)
 
 if __name__ == "__main__":
     main()

@@ -37,15 +37,16 @@ queries:
           1 AS CON_ID,
           UPPER(n.nspname) AS OWNER,          -- Schema containing the object
           UPPER(c.relname) AS OBJECT_NAME,    -- Object name
-          CASE c.relkind
-              WHEN 'r' THEN 'TABLE'            -- Regular table
-              WHEN 'v' THEN 'VIEW'             -- View
-              WHEN 'm' THEN 'MATERIALIZED VIEW'  
-              WHEN 'i' THEN 'INDEX'            -- Index
-              WHEN 'S' THEN 'SEQUENCE'         -- Sequence
-              WHEN 't' THEN 'TOAST TABLE'      -- TOAST table (internal)
-              WHEN 'p' THEN 'PARTITIONED TABLE'-- Partitioned table
-              ELSE c.relkind::text             -- Other object types
+          CASE 
+              WHEN c.relkind = 'r' AND i.inhrelid IS NOT NULL THEN 'TABLE PARTITION'  -- Table partition
+              WHEN c.relkind = 'r' THEN 'TABLE'           -- Regular table
+              WHEN c.relkind = 'v' THEN 'VIEW'            -- View
+              WHEN c.relkind = 'm' THEN 'MATERIALIZED VIEW'  
+              WHEN c.relkind = 'i' THEN 'INDEX'           -- Index
+              WHEN c.relkind = 'S' THEN 'SEQUENCE'        -- Sequence
+              WHEN c.relkind = 't' THEN 'TOAST TABLE'     -- TOAST table (internal)
+              WHEN c.relkind = 'p' THEN 'PARTITIONED TABLE' -- Partitioned table
+              ELSE c.relkind::text                        -- Other object types
           END AS OBJECT_TYPE,
           'Postgres' AS DMA_SOURCE_ID,
           NULL AS DMA_MANUAL_ID
@@ -58,7 +59,6 @@ queries:
       WHERE
           c.relkind IN ('r', 'v', 'm', 'i', 'S', 't', 'p')  -- Filter desired object types
           AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')  -- Exclude system schemas
-          AND i.inhrelid IS NULL              -- Exclude partitions (child tables)
           AND NOT EXISTS (                    -- Exclude partition indexes
               SELECT 1
               FROM pg_inherits pi
