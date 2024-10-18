@@ -46,6 +46,7 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
     # Construct the connection string
     if tns:
         dsn = tns
+        oracledb.init_oracle_client(lib_dir=tns_path.replace("/network/admin", ""))  # Point to the Oracle client libraries
         conn = oracledb.connect(
             user=db_user,
             password=db_password,

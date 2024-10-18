@@ -56,14 +56,13 @@ queries:
           pg_namespace n ON n.oid = c.relnamespace
       LEFT JOIN
           pg_inherits i ON c.oid = i.inhrelid  -- Join with pg_inherits to identify partitions
+      LEFT JOIN
+          pg_index ix ON ix.indexrelid = c.oid  -- Join with pg_index to identify indexes
+      LEFT JOIN
+          pg_class p ON p.oid = ix.indrelid     -- Join with pg_class to get the parent table of the index
       WHERE
           c.relkind IN ('r', 'v', 'm', 'i', 'S', 't', 'p')  -- Filter desired object types
           AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')  -- Exclude system schemas
-          AND NOT EXISTS (                    -- Exclude partition indexes
-              SELECT 1
-              FROM pg_inherits pi
-              WHERE pi.inhrelid = c.oid AND c.relkind = 'i'
-          )
       ORDER BY
           3, 4;
   - name: "pgdb__sourcecodedetailed__data" 
