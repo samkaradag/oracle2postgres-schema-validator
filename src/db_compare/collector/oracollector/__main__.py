@@ -72,7 +72,13 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
     if tns:
         db_host_alpha = ''.join(c for c in tns if c.isalpha())
     else:
-        db_host_alpha = ''.join(c for c in db_host if c.isalpha()) 
+        # db_host_alpha = ''.join(c for c in db_host if c.isalpha()) 
+        if all(c.isdigit() or c == '.' for c in db_host):
+        # Remove the periods and prefix with 'ip_'
+            db_host_alpha = 'ip_' + db_host.replace('.', '_')
+        else:
+            # If it's not an IP, just extract alphabetic characters
+            db_host_alpha = ''.join(c for c in db_host if c.isalpha())
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
@@ -89,7 +95,7 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
         query_name = config['queries'][i].get('name', f"query_{i+1}")
 
         # Create a CSV file for the query results
-        csv_file = os.path.join(extracts_dir, f"{query_name}.csv")
+        csv_file = os.path.join(extracts_dir, f"{db_host_alpha}_{query_name}.csv")
 
         with open(csv_file, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter='|')

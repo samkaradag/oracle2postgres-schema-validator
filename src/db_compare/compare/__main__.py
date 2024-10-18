@@ -126,7 +126,7 @@ def main():
         # Call pgcollector
         subprocess.run(["python", "-m", "pgcollector", "--host", args.postgres_host1, "--database", args.postgres_database1,
                         "--user", args.postgres_user1, "--password", args.postgres_password1], check=True)
-        print("Loading metadata into staging area...")
+        
     
     elif args.oracle_to_oracle:
         #  Oracle to Oracle comparison
@@ -158,7 +158,8 @@ def main():
         for i in [1, 2]:
             subprocess.run(["python", "-m", "pgcollector", "--host", getattr(args, f"postgres_host{i}"), "--database", getattr(args, f"postgres_database{i}"),
                           "--user", getattr(args, f"postgres_user{i}"), "--password", getattr(args, f"postgres_password{i}"), "--port", getattr(args, f"postgres_port{i}")], check=True)
-
+    
+    print("Loading metadata into staging area...")
     # Call importer
     if args.staging_project_id:
         subprocess.run(["python", "-m", "importer", "--project_id", args.staging_project_id, "--dataset_id", args.staging_dataset_id], check=True)
