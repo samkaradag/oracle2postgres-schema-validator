@@ -104,6 +104,10 @@ compare --oracle_to_oracle \
 ```
 
 **Example (Oracle to Oracle, Postgres Staging, using tns):**
+If you are using Oracle Client and tns please ensure that LD_LIBRARY_PATH is updated with the oracle_client path. i.e:
+
+export LD_LIBRARY_PATH=~/oracle-client/instantclient_23_5:$LD_LIBRARY_PATH
+
 ```bash
 compare --oracle_to_oracle \
 --oracle_tns1 <oracle_tns_alias1> --oracle_tns_path1 <tnsnames.ora_path_1> \
@@ -113,7 +117,6 @@ compare --oracle_to_oracle \
 ```
 
 **Example (Oracle to Oracle, BigQuery Staging):**
-
 (Please note that Staging environment can be postgres or bigquery independent of the comparison mode)
 
 ```bash
