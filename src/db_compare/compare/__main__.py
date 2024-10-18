@@ -120,6 +120,7 @@ def main():
                 print("Oracle metadata extraction successful.")
             except subprocess.CalledProcessError as e:
                 print(f"Error extracting Oracle metadata: {e.stderr}")
+                return
 
         print("Extracting Postgres metadata...")
         
@@ -150,8 +151,10 @@ def main():
 
             except AttributeError as e:
                 print(f"Missing argument for connection {i}: {e}")
+                return
             except subprocess.CalledProcessError as e:
                 print(f"Error extracting Oracle metadata for connection {i}: {e.stderr}")
+                return
 
     elif args.postgres_to_postgres:
          # Postgres to Postgres comparison

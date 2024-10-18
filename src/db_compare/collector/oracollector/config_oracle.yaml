@@ -41,7 +41,7 @@ queries:
           1 AS CON_ID, 
           owner,
           CASE 
-              WHEN object_type = 'TABLE PARTITION'  THEN SUBOBJECT_NAME
+              WHEN object_type = 'TABLE PARTITION'  THEN object_name||'_'||SUBOBJECT_NAME
               ELSE object_name 
           END AS object_name,
           CASE 
