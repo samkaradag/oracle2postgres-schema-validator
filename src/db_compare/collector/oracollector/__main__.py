@@ -50,7 +50,8 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
             user=db_user,
             password=db_password,
             dsn=dsn,
-            config_dir=tns_path
+            config_dir=tns_path,
+            ssl_server_dn_match=False  # Disable SSL certificate validation
         )
     else:
         dsn = oracledb.makedsn(host=db_host, port=db_port, service_name=db_service)
