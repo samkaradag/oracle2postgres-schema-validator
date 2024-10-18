@@ -69,7 +69,10 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
     # Create the "extracts" directory if it doesn't exist
     extracts_dir = os.path.join("./", "extracts")
     os.makedirs(extracts_dir, exist_ok=True)
-    db_host_alpha = ''.join(c for c in db_host if c.isalpha()) 
+    if tns:
+        db_host_alpha = ''.join(c for c in tns if c.isalpha())
+    else:
+        db_host_alpha = ''.join(c for c in db_host if c.isalpha()) 
     # Loop through each query in the configuration file
     for i, query in enumerate(config['queries']):
         # Execute the query
