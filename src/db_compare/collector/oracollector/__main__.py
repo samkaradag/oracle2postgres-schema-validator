@@ -130,7 +130,7 @@ def main():
     parser.add_argument('--tns', type=str, help='TNS name (alias) (alternative to --host, --port, --service)')
     parser.add_argument('--tns_path', type=str, help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     
-    parser.add_argument('--view_type', type=str, help='Type of catalog views either "all or "user"')
+    parser.add_argument('--view_type', default='all', type=str, help='Type of catalog views either "all or "user"')
     parser.add_argument('--protocol', default='tcp', type=str, help='Protocol either "tcp" or "tcps"')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
