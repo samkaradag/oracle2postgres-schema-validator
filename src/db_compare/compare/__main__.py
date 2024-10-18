@@ -143,7 +143,7 @@ def main():
                         "--view_type", args.oracle_view_type]
                 command.extend(arguments)
 
-                subprocess.run(command, check=True)
+                subprocess.run(command, check=True, capture_output=True, text=True)
                 # print(f"Oracle metadata extraction successful for connection {i}.")
 
             except AttributeError as e:
