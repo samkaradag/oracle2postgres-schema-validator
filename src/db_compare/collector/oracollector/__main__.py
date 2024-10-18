@@ -108,7 +108,7 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
 
     # Delete existing files starting with "orcl-extract-"
     for filename in os.listdir(extracts_dir):
-        if filename.startswith("orcl-extract-"):
+        if filename.startswith(f"orcl-extract-{db_host_alpha}"):
             os.remove(os.path.join(extracts_dir, filename))
 
 
