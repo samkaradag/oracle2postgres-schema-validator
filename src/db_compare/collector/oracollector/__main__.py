@@ -107,7 +107,10 @@ def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, t
 
 
     # Zip all the CSV files in the "extracts" directory
-    zip_file = os.path.join(extracts_dir, f"orcl-extract-{db_host_alpha}.zip")
+    if tns:
+        zip_file = os.path.join(extracts_dir, f"orcl-extract-{db_host_alpha}.zip")
+    else:
+        zip_file = os.path.join(extracts_dir, f"orcl-extract-{db_host}.zip")
     with zipfile.ZipFile(zip_file, 'w') as z:
         for filename in os.listdir(extracts_dir):
             if filename.endswith(".csv"):
