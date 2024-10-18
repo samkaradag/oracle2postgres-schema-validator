@@ -143,7 +143,7 @@ def main():
                         "--view_type", args.oracle_view_type]
                 command.extend(arguments)
 
-                result = subprocess.run(command, check=True, capture_output=True, text=True)
+                result = subprocess.run(command, check=True)
                 # Print the captured output
                 print(result.stdout)
                 # print(f"Oracle metadata extraction successful for connection {i}.")
