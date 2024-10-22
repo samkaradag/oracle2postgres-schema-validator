@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "db_compare"
-version = "0.1.16"
+version = "0.1.17"
 description = "Tool to compare database schema and objects"
 authors = ["sametkaradag <sametkaradag@gmail.com>"]
 license = "Google"

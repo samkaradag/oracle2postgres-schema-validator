@@ -48,7 +48,7 @@ def main():
     oracle_group.add_argument('--oracle_tns2', help='TNS name (alias) (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_tns_path2', help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_protocol2' , default='tcp' , help='Oracle database 2 protocol (tcp or tcps) (optional)')
-    oracle_group.add_argument('--oracle_view_type', default='user', choices=['user', 'all'], help='Type of views to collect (user or all)')
+    oracle_group.add_argument('--oracle_view_type', default='all', choices=['user', 'all'], help='Type of views to collect (user or all)')
 
 
 
