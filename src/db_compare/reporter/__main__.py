@@ -29,15 +29,23 @@ DEFAULT_TABLE_NAME = "instances"
 DEFAULT_SCHEMA_NAME = "schema_compare"
 CONFIG_FILE = "query_config.yaml"
 QUERIES_FOLDER = "queries"
+LOG_FILE = "executed_reporter_queries.sql"  # Log file for the executed SQL queries
 
 # Global variables for database connections
 client = None  # BigQuery client
 cursor = None  # Postgres cursor
 conn = None   # Postgres connection
 
+
 def get_script_path():
     """Returns the absolute path of the currently executing script."""
     return os.path.dirname(os.path.abspath(__file__))
+
+def log_query(query, query_file):
+    """Logs the modified query to a file."""
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(f"-- {datetime.datetime.now()} - Executed Query {query_file}:\n{query}\n\n")
+
 
 def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
     """Replaces placeholders in SQL queries."""
@@ -59,6 +67,8 @@ def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to
             query = query.replace('<dataset_name>', dataset_name)
         elif db_type == "postgres":
             query = query.replace('<dataset_name>', schema_name)
+
+        log_query(query, query_file)  # Log the modified query
         return query
 
 def execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
@@ -101,6 +111,8 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
     <html>
     <head>
     <title>Database Comparison Report</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
     <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -112,38 +124,43 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
       }
       
       h2 {
-        color: #2980b9;
+        color: #4285f4;
         text-align: center;
         margin-bottom: 1em;
       }
       
       h3 {
-        color: #3498db;
+        color: #4285f4;
         margin-top: 2em;
         margin-bottom: 1em;
       }
       
-      ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-        text-align: center;
-        margin-bottom: 2em;
-      }
-      
-      li {
-        display: inline-block;
-        margin: 0 1em;
-      }
-      
-      a {
-        color: #2980b9;
-        text-decoration: none;
-      }
-      
-      a:hover {
-        text-decoration: underline;
-      }
+      /* Menu Styling */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;  /* Center the menu */
+            background-color: #4285f4; /* Dark background */
+            overflow: hidden; /* Hide overflowing menu items */
+        }
+
+        li {
+            display: inline-block; /* Horizontal menu items */
+            margin: 0;  /* Remove default margin */
+        }
+
+        li a {
+            color: white; /* White text */
+            display: block; /* Make the entire list item clickable */
+            padding: 14px 16px; /* Padding around the link text */
+            text-decoration: none; /* Remove underlines */
+            transition: background-color 0.3s ease; /* Smooth background transition */
+        }
+
+        li a:hover {
+            background-color: #307bf5; /* Darker background on hover */
+        }
       
       table {
         border-collapse: collapse;
@@ -193,7 +210,7 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
         cursor: pointer;
     }
     .back-to-top:hover {
-        background-color: #0056b3;
+        background-color: #4285f4;
     }
     .back-to-top i { /* Style the arrow icon */
         font-size: 1.2em;
@@ -214,23 +231,36 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
         report += f"<h3><a name='{section.replace(' ', '_')}'></a>{section}</h3>"
         table_data = results[i]
         if table_data:
-            report += "<table><thead><tr>"
+            table_id = f"table_{i}"  # Unique ID for each table
+            report += f"<table id='{table_id}' class='display'><thead><tr>" # 'display' class is for DataTables
             for header in table_data[0].keys():
                 report += f"<th>{header}</th>"
             report += "</tr></thead><tbody>"
             for row in table_data:
                 report += "<tr>"
                 for value in row.values():
-                    report += f"<td>{value}</td>"
+                    report += f"<td>{value}</td>" # Escape HTML special chars if needed
                 report += "</tr>"
             report += "</tbody></table>"
+
+
+
         else:
             report += "<p>No results found.</p>"
+    
+    report += """
+
+    <button class="back-to-top"><i class="fas fa-arrow-up"></i></button>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready( function () {"""  # Initialize DataTables in document.ready
+
+    for i in range(len(config)):
+        report += f"$('#table_{i}').DataTable();"
 
     report += """
-    <button class="back-to-top"><i class="fas fa-arrow-up"></i></button>
-    <script>
-        // Get the button element
+    // Get the button element
         const backToTopButton = document.querySelector(".back-to-top");
 
         // When the user scrolls down 20px from the top of the document, show the button
@@ -247,11 +277,15 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
         });
+        } );
+
     </script>
     </body>
     </html>
     """
+
     return report
+
 
 def get_instance_names(dataset_name, schema_name, table_name):
     """Retrieves distinct instance names from the database."""
@@ -268,6 +302,10 @@ def main():
     """Main function to execute the script."""
     global client, cursor, conn, db_type, project_id, dataset_name, table_name, schema_name, schemas_to_compare, report_format
 
+    # Remove log file if it already exists
+    if os.path.exists(LOG_FILE):
+        os.remove(LOG_FILE)
+    
     parser = argparse.ArgumentParser(description="Generate database comparison report.")
     parser.add_argument("--dataset_id", help="BigQuery dataset name.")
     parser.add_argument("--table_name", help="BigQuery table name.")

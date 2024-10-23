@@ -167,6 +167,9 @@ def delete_files_in_directory(directory):
             if os.path.isfile(file_path):
                 if filename.endswith('.zip'):
                     # Move zip files to the 'archives' directory
+                    archived_file = os.path.join(archives_dir,filename)
+                    if os.path.isfile(archived_file):
+                        os.remove(archived_file)
                     shutil.move(file_path, archives_dir)
                     print(f"Moved file: {filename} to archives")
                 else:

@@ -42,7 +42,7 @@ queries:
               WHEN c.relkind = 'r' THEN 'TABLE'           -- Regular table
               WHEN c.relkind = 'v' THEN 'VIEW'            -- View
               WHEN c.relkind = 'm' THEN 'MATERIALIZED VIEW'  
-              WHEN c.relkind = 'i' THEN 'INDEX'           -- Index
+              WHEN c.relkind = 'i' or c.relkind = 'I' THEN 'INDEX'           -- Index
               WHEN c.relkind = 'S' THEN 'SEQUENCE'        -- Sequence
               WHEN c.relkind = 't' THEN 'TOAST TABLE'     -- TOAST table (internal)
               WHEN c.relkind = 'p' THEN 'PARTITIONED TABLE' -- Partitioned table
@@ -61,10 +61,29 @@ queries:
       LEFT JOIN
           pg_class p ON p.oid = ix.indrelid     -- Join with pg_class to get the parent table of the index
       WHERE
-          c.relkind IN ('r', 'v', 'm', 'i', 'S', 't', 'p')  -- Filter desired object types
+          c.relkind IN ('r', 'v', 'm', 'i', 'S', 't', 'p', 'I')  -- Filter desired object types
+          AND NOT((c.relkind = 'i' ) and c.oid is NOT NULL)
           AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')  -- Exclude system schemas
+      UNION ALL
+      SELECT
+          'postgres<db-name>' AS PKEY,1 AS CON_ID,
+          UPPER(n.nspname) AS OWNER,
+          UPPER(p.proname) AS OBJECT_NAME, -- Procedures and functions
+          CASE p.prokind 
+              WHEN 'p' THEN 'PROCEDURE'
+              WHEN 'f' THEN 'FUNCTION'
+          END AS OBJECT_TYPE,
+         'Postgres' AS DMA_SOURCE_ID,
+          NULL AS DMA_MANUAL_ID
+      FROM
+          pg_proc p
+      JOIN
+          pg_namespace n ON p.pronamespace = n.oid
+      WHERE
+          p.prolang = (SELECT oid FROM pg_language WHERE lanname = 'plpgsql')  -- Filter for PL/pgSQL
+          AND n.nspname NOT IN ('pg_catalog', 'information_schema')  -- Exclude system schemas
       ORDER BY
-          3, 4;
+          3,4;
   - name: "pgdb__sourcecodedetailed__data" 
     query: | 
       SELECT
