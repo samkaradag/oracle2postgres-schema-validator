@@ -23,6 +23,8 @@ from sqlalchemy.orm import sessionmaker
 import pandas as pd
 from sqlalchemy import text
 import shutil
+import re
+import sys
 
 # Base = declarative_base()
 
@@ -203,4 +205,6 @@ def main():
     delete_files_in_directory(args.csv_directory)
 
 if __name__ == "__main__":
-    main()
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+    # main()

@@ -1,0 +1,13 @@
+Instances: instances.sql
+All Object Counts: object_counts.sql
+Missing Objects: missing_objects.sql
+Missing Columns: missing_columns.sql
+# Missing Indexes: missing_indexes.sql
+# Column Type Mismatches: column_type_mismatch.sql
+# Mismatched Line Counts (PL/SQL): line_count_mismatch.sql
+Missing PLSQL: missing_plsql.sql
+# Mismatched Line Counts per Object (PL/SQL): line_count_mismatch_detailed.sql
+# Missing Role Grants: missing_role_grants.sql
+# Missing Sys Privileges: missing_sys_privs.sql
+# Invalid Objects: invalid_objects.sql
+# Source Code Differences: source_code_diff.sql

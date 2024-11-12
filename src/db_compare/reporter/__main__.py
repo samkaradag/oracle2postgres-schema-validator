@@ -20,6 +20,7 @@ from tabulate import tabulate
 import datetime
 import psycopg2
 import re
+import sys
 
 
 # Configuration
@@ -47,9 +48,10 @@ def log_query(query, query_file):
         log_file.write(f"-- {datetime.datetime.now()} - Executed Query {query_file}:\n{query}\n\n")
 
 
-def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
+def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, schema_mapping, dataset_name, schema_name):
     """Replaces placeholders in SQL queries."""
     with open(os.path.join(get_script_path(), QUERIES_FOLDER, query_file), "r") as f:
+        # print(f"Query path:{QUERIES_FOLDER}")
         query = f.read()
         query = query.replace('<instance_1_id>', instance_1_name)
         query = query.replace('<instance_2_id>', instance_2_name)
@@ -62,6 +64,10 @@ def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to
             query = query.replace('<w_schema_filter>', '')
             query = query.replace('<a_schema_filter>', '')
             query = query.replace('<schema_filter>', '')
+
+        if schema_mapping:
+            query = query.replace('<instance_1_owner>', schema_mapping[0])
+            query = query.replace('<instance_2_owner>', schema_mapping[1])
         
         if db_type == "bigquery":
             query = query.replace('<dataset_name>', dataset_name)
@@ -71,12 +77,12 @@ def replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to
         log_query(query, query_file)  # Log the modified query
         return query
 
-def execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name):
+def execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, schema_mapping, dataset_name, schema_name):
     """Executes SQL queries from configuration."""
     results = []
     for section, query_file in config.items():
         print("Checking: ", section)
-        query = replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name)
+        query = replace_instance_id(query_file, instance_1_name, instance_2_name, schemas_to_compare, schema_mapping, dataset_name, schema_name)
         results.append(execute_query(query))
     return results
 
@@ -110,10 +116,16 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
     <!DOCTYPE html>
     <html>
     <head>
-    <title>Database Comparison Report</title>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <title>Database Comparison Report</title>"""
 
-    <style>
+    # Include CSS files
+    css_folder = os.path.join(get_script_path(), 'css')
+    for filename in os.listdir(css_folder):
+        if filename.endswith('.css'):
+            with open(os.path.join(css_folder, filename), 'r') as css_file:
+                report += "<style>\n" + css_file.read() + "\n</style>\n"
+
+    report += """<style>
     body {
         font-family: 'Arial', sans-serif;
         background-color: #f4f4f4;
@@ -247,12 +259,25 @@ def generate_html_report(config, results, instance_1_name, instance_2_name):
 
         else:
             report += "<p>No results found.</p>"
+
+    # Include JS files
+    js_folder = os.path.join(get_script_path(), 'css')  # Adjust this if your JS is in a different folder
+    for filename in os.listdir(js_folder):
+        if filename.endswith('js'):
+            with open(os.path.join(js_folder, filename), 'r') as js_file:
+                report += '\n<script type = "text/javascript">\n' + js_file.read() + "\n</script>\n"
+
+    # Include minimized JS files
+    js_folder = os.path.join(get_script_path(), 'css')  # Adjust this if your JS is in a different folder
+    for filename in os.listdir(js_folder):
+        if filename.endswith('min.js'):
+            with open(os.path.join(js_folder, filename), 'r') as js_file:
+                report += '\n<script type = "text/javascript">\n' + js_file.read() + "\n</script>\n"
     
     report += """
 
     <button class="back-to-top"><i class="fas fa-arrow-up"></i></button>
-    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
     <script>
         $(document).ready( function () {"""  # Initialize DataTables in document.ready
 
@@ -300,8 +325,7 @@ def get_instance_names(dataset_name, schema_name, table_name):
 
 def main():
     """Main function to execute the script."""
-    global client, cursor, conn, db_type, project_id, dataset_name, table_name, schema_name, schemas_to_compare, report_format
-
+    global CONFIG_FILE, QUERIES_FOLDER, client, cursor, conn, db_type, project_id, dataset_name, table_name, schema_name, schemas_to_compare, report_format  
     # Remove log file if it already exists
     if os.path.exists(LOG_FILE):
         os.remove(LOG_FILE)
@@ -323,6 +347,7 @@ def main():
     parser.add_argument("--postgres_database", help="Postgres database name.")
     parser.add_argument("--schema_name", help="Postgres schema name.")
     parser.add_argument("--schemas_to_compare", help="Schemas to be compared (comma-separated).")
+    parser.add_argument("--schema_mapping", help="Schema mapping i.e: 'SCHEMA_1/SCHEMA_2' (Only one mapping is allowed).")
     args = parser.parse_args()
 
     # Get configuration
@@ -331,8 +356,14 @@ def main():
     table_name = args.table_name or os.environ.get("TABLE_NAME") or DEFAULT_TABLE_NAME
     schema_name = args.schema_name or os.environ.get("SCHEMA_NAME") or DEFAULT_SCHEMA_NAME
     schemas_to_compare = args.schemas_to_compare or os.environ.get("SCHEMAS_TO_COMPARE")
+    schema_mapping = args.schema_mapping 
     if schemas_to_compare:
         schemas_to_compare = ",".join([f"'{item.strip()}'" for item in schemas_to_compare.split(',')])
+    if schema_mapping:
+        schema_mapping = schema_mapping.split('/')
+        QUERIES_FOLDER = 'queries_schema_mapped'
+        CONFIG_FILE = "query_config_schema_mapped.yaml"
+    
     report_format = args.format
     db_type = args.db_type
 
@@ -367,11 +398,12 @@ def main():
         instance_1_name, instance_2_name = instance_names[:2]
         print("Instance 1:", instance_1_name)
         print("Instance 2:", instance_2_name)
-
+        if schema_mapping:
+            print(f"Schema mapping - {instance_1_name}:{schema_mapping[0]}, {instance_2_name}:{schema_mapping[1]}")
         # Load configuration and execute queries
         with open(os.path.join(get_script_path(), CONFIG_FILE), "r") as f:
             config = yaml.safe_load(f)
-        results = execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, dataset_name, schema_name)
+        results = execute_queries(config, instance_1_name, instance_2_name, schemas_to_compare, schema_mapping, dataset_name, schema_name)
 
         # Generate report
         if report_format == "text":
@@ -393,4 +425,6 @@ def main():
         conn.close()
 
 if __name__ == "__main__":
-    main()
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+    # main()

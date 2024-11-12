@@ -32,8 +32,8 @@ object_counts_with_instance_ids AS (
 SELECT
   OWNER,
   OBJECT_TYPE,
-  MAX(CASE WHEN rn = 1 THEN object_count ELSE 0 END) AS <instance_1_id>_count,
-  MAX(CASE WHEN rn = 2 THEN object_count ELSE 0 END) AS <instance_2_id>_count
+  MAX(CASE WHEN instance_id = '<instance_1_id>' THEN object_count ELSE 0 END) AS <instance_1_id>_count,
+  MAX(CASE WHEN instance_id = '<instance_2_id>'  THEN object_count ELSE 0 END) AS <instance_2_id>_count
 FROM object_counts_with_instance_ids <w_schema_filter>
 GROUP BY OWNER, OBJECT_TYPE
 ORDER BY OBJECT_TYPE;

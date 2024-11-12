@@ -16,7 +16,8 @@ import argparse
 import logging
 import os
 import subprocess
-
+import re
+import sys
 
 def main():
     """Main function for the schema comparison utility."""
@@ -48,7 +49,7 @@ def main():
     oracle_group.add_argument('--oracle_tns2', help='TNS name (alias) (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_tns_path2', help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     oracle_group.add_argument('--oracle_protocol2' , default='tcp' , help='Oracle database 2 protocol (tcp or tcps) (optional)')
-    oracle_group.add_argument('--oracle_view_type', default='all', choices=['user', 'all'], help='Type of views to collect (user or all)')
+    oracle_group.add_argument('--oracle_view_type', default='dba', choices=['user', 'all', 'dba'], help='Type of views to collect (user or all or dba)')
 
 
 
@@ -95,6 +96,8 @@ def main():
 
     # Report options
     parser.add_argument('--schemas_to_compare', help='Comma-separated list of schemas to compare')
+    parser.add_argument("--schema_mapping", help="Schema mapping i.e: 'SCHEMA_1/SCHEMA_2' (Only one mapping is allowed).")
+    
     parser.add_argument('--format', default='html', choices=['html', 'text'], help='Report output format')
 
     args = parser.parse_args()
@@ -177,13 +180,15 @@ def main():
     # Call reporter
     if args.staging_project_id:
         subprocess.run(["python", "-m", "reporter", "--db_type", "bigquery", "--project_id", args.staging_project_id,
-                      "--dataset_id", args.staging_dataset_id, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format], check=True)
+                      "--dataset_id", args.staging_dataset_id, "--schemas_to_compare", args.schemas_to_compare or "", "--schema_mapping", args.schema_mapping or "", "--format", args.format], check=True)
     elif args.staging_postgres_connection_string:
         subprocess.run(["python", "-m", "reporter", "--db_type", "postgres", "--postgres_connection_string", args.staging_postgres_connection_string,
-                      "--schema_name", args.staging_schema, "--schemas_to_compare", args.schemas_to_compare or "", "--format", args.format], check=True)
+                      "--schema_name", args.staging_schema, "--schemas_to_compare", args.schemas_to_compare or "", "--schema_mapping", args.schema_mapping or "", "--format", args.format], check=True)
     else:
         logging.error('Please specify either project_id and dataset_id for BigQuery or connection_string for Postgres')
         return
 
 if __name__ == '__main__':
-    main()
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+    # main()

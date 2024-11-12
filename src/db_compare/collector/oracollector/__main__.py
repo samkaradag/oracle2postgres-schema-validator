@@ -20,6 +20,8 @@ import zipfile
 import argparse
 import pathlib
 import platform
+import re
+import sys
 
 
 def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, tns, tns_path, config_file, view_type='all', protocol='tcp'):
@@ -143,7 +145,7 @@ def main():
     parser.add_argument('--tns', type=str, help='TNS name (alias) (alternative to --host, --port, --service)')
     parser.add_argument('--tns_path', type=str, help='Path to tnsnames.ora file (alternative to --host, --port, --service)')
     
-    parser.add_argument('--view_type', default='all', type=str, help='Type of catalog views either "all or "user"')
+    parser.add_argument('--view_type', default='dba', type=str, help='Type of catalog views either "all or "dba" or "user"')
     parser.add_argument('--protocol', default='tcp', type=str, help='Protocol either "tcp" or "tcps"')
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
@@ -160,4 +162,6 @@ def main():
     # extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, "./config_oracle.yaml", args.view_type, args.protocol)
 
 if __name__ == "__main__":
-    main()
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+    # main()

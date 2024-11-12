@@ -2,9 +2,9 @@ queries:
   - name: "orcl__columns__data"
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID,
-          owner,
+          UPPER(owner) as owner,
           table_name,
           column_name,
           data_type,
@@ -20,15 +20,15 @@ queries:
   - name: "orcl__instances__data"
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID
       FROM dual
   - name: "orcl__views__data"
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID, 
-          owner,
+          UPPER(owner) as owner,
           view_name, 
           'Oracle' AS DMA_SOURCE_ID, 
           NULL AS DMA_MANUAL_ID 
@@ -37,11 +37,12 @@ queries:
   - name: "orcl__dbobjectnames__data" 
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID, 
-          owner,
+          UPPER(owner) as owner,
           CASE 
               WHEN object_type = 'TABLE PARTITION'  THEN object_name||'_'||SUBOBJECT_NAME
+              WHEN object_name like 'DR$IDX_%'  THEN object_name||' *Warning: FULL TEXT SEARCH INDEX*'
               ELSE object_name 
           END AS object_name,
           CASE 
@@ -51,16 +52,16 @@ queries:
           'Oracle' AS DMA_SOURCE_ID, 
           NULL AS DMA_MANUAL_ID 
       FROM <view_type>_objects o
-      WHERE owner NOT IN ('SYS', 'SYSTEM')
+      WHERE owner NOT IN ('SYS', 'SYSTEM') and OBJECT_TYPE NOT IN ('LOB')
       ORDER BY owner, object_type, object_name
   - name: "orcl__sourcecodedetailed__data" 
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID, a.*, 'Oracle' AS DMA_SOURCE_ID, 
           NULL AS DMA_MANUAL_ID 
           from (
-                Select owner,
+                Select UPPER(owner)  as owner,
                 name, 
                 type, 
                 max(line) NR_LINES
@@ -71,9 +72,9 @@ queries:
   - name: "orcl__triggers__data" 
     query: |
       SELECT 
-          'oracle<db-name>' AS PKEY,
+          'oracle_<db-name>' AS PKEY,
           1 AS CON_ID,
-          owner,
+          UPPER(owner) as owner,
           trigger_name,
           table_name, 
           status, 

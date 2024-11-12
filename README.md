@@ -1,6 +1,6 @@
 # Database Comparison Utility
 
-This utility streamlines the process of comparing the schemas and code objects of Oracle and Postgres databases. This utility can be useful for heterogenous migrations from Oracle to Postgres or vice-versa to check whether all the objects i.e: PLSQL, tables, columns, data types, indexes, views, columns, sequences are migrated. It can leverage Google BigQuery or any Postgres database as a staging environment to load analyze metadata.
+This utility streamlines the process of comparing the schemas and code objects of Oracle and Postgres databases. This utility can be useful for homogenous and heterogenous migrations from Oracle to Postgres or vice-versa to check whether all the objects i.e: PLSQL, tables, columns, data types, indexes, views, columns, sequences are migrated. It can leverage Google BigQuery or any Postgres database as a staging environment to load analyze metadata.
 
 Currently it supports following database types and comparison modes:
 
@@ -12,7 +12,7 @@ Currently it supports following database types and comparison modes:
 ## Key Features
 
 * **Metadata Collection:**  Extracts comprehensive schema metadata (tables, views, functions, procedures, etc.) from Oracle and Postgres databases.
-* **BigQuery Integration:** Seamlessly imports collected metadata into Google BigQuery for centralized analysis.
+* **BigQuery Integration:** Imports collected metadata into Google BigQuery for centralized analysis.
 * **Detailed Comparison Reports:** Generates clear, text and html based reports highlighting differences in:
     * Object counts (tables, views, etc.)
     * Missing objects in either database
@@ -46,7 +46,7 @@ Currently it supports following database types and comparison modes:
     * python3.9
     * Shell environment (CLI) and an empty directory to run python from.
     * Network connectivity to Oracle, Postgres instances and BigQuery APIs.
-    * **Oracle (Optional):** Grant access to Oracle catalog views (e.g., `all_objects`, `all_tables`, etc.) to the user you will use for the comparison. This is required if you want to collect metadata for all objects in the database. If you only need metadata for the connected user's objects, you can use the `--view_type user` option (default) and skip granting these permissions. See the "Usage" section for examples.
+    * **Oracle (Optional):** Grant access to Oracle catalog views (e.g., `dba_objects`, `dba_tables`, etc.) to the user you will use for the comparison. This is required if you want to collect metadata for all objects in the database. If you only need metadata for the connected user's objects, you can use the `--view_type user` option (default) and skip granting these permissions. See the "Usage" section for examples.
 
 
     Please replace oracle_db_user with your database user.
@@ -59,19 +59,19 @@ Currently it supports following database types and comparison modes:
     Option 2:
 
         ```sql
-        GRANT SELECT ON all_objects TO <db_user>;
-        GRANT SELECT ON all_synonyms TO <db_user>;
-        GRANT SELECT ON all_source TO <db_user>;
-        GRANT SELECT ON all_indexes TO <db_user>;
-        GRANT SELECT ON all_users TO <db_user>;
-        GRANT SELECT ON all_role_privs TO <db_user>;
-        GRANT SELECT ON all_roles TO <db_user>;
-        GRANT SELECT ON all_triggers TO <db_user>;
-        GRANT SELECT ON all_tab_columns TO <db_user>;
-        GRANT SELECT ON all_tables TO <db_user>;
-        GRANT SELECT ON all_constraints TO <db_user>;
-        GRANT SELECT ON all_tab_privs TO <db_user>;
-        GRANT SELECT ON all_sys_privs TO <db_user>;
+        GRANT SELECT ON dba_objects TO <db_user>;
+        GRANT SELECT ON dba_synonyms TO <db_user>;
+        GRANT SELECT ON dba_source TO <db_user>;
+        GRANT SELECT ON dba_indexes TO <db_user>;
+        GRANT SELECT ON dba_users TO <db_user>;
+        GRANT SELECT ON dba_role_privs TO <db_user>;
+        GRANT SELECT ON dba_roles TO <db_user>;
+        GRANT SELECT ON dba_triggers TO <db_user>;
+        GRANT SELECT ON dba_tab_columns TO <db_user>;
+        GRANT SELECT ON dba_tables TO <db_user>;
+        GRANT SELECT ON dba_constraints TO <db_user>;
+        GRANT SELECT ON dba_tab_privs TO <db_user>;
+        GRANT SELECT ON dba_sys_privs TO <db_user>;
         ```
 
 ## Usage
@@ -89,6 +89,17 @@ compare --oracle_to_postgres \
 --postgres_host1 <postgres_host> --postgres_database1 <postgres_database> --postgres_user1 <postgres_user> --postgres_password1 <postgres_password> \
 --staging_postgres_connection_string "postgresql://<staging_user>:<staging_password>@<staging_host>/<staging_database>" \
 --staging_schema schema_compare --format html --schemas_to_compare 'SCHEMA1,SCHEMA2'
+```
+
+**Example Compare Different Schema Names (Oracle to Postgres, Postgres staging):**
+
+```bash
+compare --oracle_to_postgres \
+--oracle_host1 <oracle_host> --oracle_user1 <oracle_user> --oracle_password1 <oracle_password> --oracle_service1 <oracle_service> \
+--postgres_host1 <postgres_host> --postgres_database1 <postgres_database> --postgres_user1 <postgres_user> --postgres_password1 <postgres_password> \
+--staging_postgres_connection_string "postgresql://<staging_user>:<staging_password>@<staging_host>/<staging_database>" \
+--staging_schema schema_compare --format html  \
+--schema_mapping 'SOURCE_SCHEMA/TARGET_SCHEMA'
 ```
 
 **Example (Oracle to Oracle, Postgres Staging):**
@@ -159,7 +170,7 @@ compare \
 
 Filter by specific schema
 ```bash
-ora2pg-compare \
+compare \
 --oracle_host oracle_host_name_or_ip \
 --oracle_user database_user \
 --oracle_password database_password \
@@ -198,7 +209,7 @@ ora2pg-compare \
 #### 1. Collect Metadata:
 * **Oracle Collect:** 
         
-Execute the following command by putting your db connection settings. If you want to get all_* views use --view_type all, if you want to get user_* views use --view_type user:
+Execute the following command by putting your db connection settings. If you want to get dba_* views use --view_type all, if you want to get user_* views use --view_type user:
 
 ```bash 
 oracollector --host oracle_ip_address --user db_user --password db_passwd --service oracle_service_name --view_type all

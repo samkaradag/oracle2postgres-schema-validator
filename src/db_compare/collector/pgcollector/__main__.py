@@ -19,6 +19,8 @@ import os
 import zipfile
 import argparse
 import pathlib
+import re
+import sys
 
 def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     """
@@ -122,4 +124,6 @@ def main():
     extract_queries_to_csv(args.host, args.database, args.user, args.password,"./config.yaml")
 
 if __name__ == "__main__":
-    main()
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+    # main()
