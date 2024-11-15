@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "db_compare"
-version = "0.1.23"
+version = "0.1.25"
 description = "Tool to compare database schema and objects"
 authors = ["sametkaradag <sametkaradag@gmail.com>"]
 license = "Google"
@@ -24,6 +24,7 @@ psycopg2 = "^2.9.9"
 sqlalchemy = "^2.0.32"
 pandas = "^2.2.2"
 oracledb = "^2.3.0"
+google-cloud-secret-manager = "^2.21.1"
 
 [tool.poetry.scripts]
 pgcollector = "pgcollector.__main__:main"
