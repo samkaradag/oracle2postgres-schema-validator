@@ -21,6 +21,26 @@ import argparse
 import pathlib
 import re
 import sys
+from google.cloud import secretmanager
+
+
+def get_secret(secret_name):
+    """Fetches the secret value from Google Secret Manager."""
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is not set.")
+    secret_path = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(name=secret_path)
+    # print(response)
+    return response.payload.data.decode("UTF-8")
+
+def resolve_password(password_arg):
+    """Resolves the password from the argument or Google Secret Manager."""
+    if password_arg and password_arg.startswith("gcp-secret:"):
+        secret_name = password_arg.split("gcp-secret:")[1]
+        return get_secret(secret_name)
+    return password_arg
 
 def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     """
@@ -121,7 +141,9 @@ def main():
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
-    extract_queries_to_csv(args.host, args.database, args.user, args.password,"./config.yaml")
+    password = resolve_password(args.password)
+
+    extract_queries_to_csv(args.host, args.database, args.user, password,"./config.yaml")
 
 if __name__ == "__main__":
     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])

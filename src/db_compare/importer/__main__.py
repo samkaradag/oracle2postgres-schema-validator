@@ -25,6 +25,55 @@ from sqlalchemy import text
 import shutil
 import re
 import sys
+from google.cloud import secretmanager
+
+def resolve_postgres_connection_string(connection_string):
+    """
+    Resolves the PostgreSQL connection string, replacing the password with a secret
+    fetched from Google Secret Manager if specified.
+
+    Args:
+        connection_string (str): The PostgreSQL connection string.
+
+    Returns:
+        str: The updated PostgreSQL connection string.
+    """
+    if not connection_string:
+        raise ValueError("Postgres connection string is required.")
+
+    # Check if the password part is a GCP secret
+    pattern = r"postgresql://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^/]+)/(?P<db>.+)"
+    match = re.match(pattern, connection_string)
+    if not match:
+        raise ValueError("Invalid PostgreSQL connection string format.")
+
+    user, password, host, db = match.group("user"), match.group("password"), match.group("host"), match.group("db")
+
+    # If the password is prefixed with "gcp-secret:", replace it with the secret value
+    if password.startswith("gcp-secret:"):
+        secret_name = password.split("gcp-secret:")[1]
+        password = get_secret(secret_name)
+
+    # Reconstruct the connection string
+    return f"postgresql://{user}:{password}@{host}/{db}"
+
+def get_secret(secret_name):
+    """Fetches the secret value from Google Secret Manager."""
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is not set.")
+    secret_path = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(name=secret_path)
+    # print(response)
+    return response.payload.data.decode("UTF-8")
+
+def resolve_password(password_arg):
+    """Resolves the password from the argument or Google Secret Manager."""
+    if password_arg and password_arg.startswith("gcp-secret:"):
+        secret_name = password_arg.split("gcp-secret:")[1]
+        return get_secret(secret_name)
+    return password_arg
 
 # Base = declarative_base()
 
@@ -192,6 +241,10 @@ def main():
     parser.add_argument("--schema", default="schema_compare",help="Schema for your PostgreSQL database. Use this if the staging area is a postgres db.")
     
     args = parser.parse_args()
+    # postgres_connection_string = resolve_password(args.postgres_connection_string)
+
+     # Resolve the PostgreSQL connection string, replacing the password with the GCP secret if needed
+    postgres_connection_string = resolve_postgres_connection_string(args.postgres_connection_string)
 
     unzip_all_files(args.zip_directory)
 
@@ -199,7 +252,7 @@ def main():
         load_csv_to_bigquery(args.project_id, args.dataset_id, args.csv_directory, args.location)
 
     if args.postgres_connection_string:
-        load_csv_to_postgres(args.csv_directory, args.postgres_connection_string, args.schema)
+        load_csv_to_postgres(args.csv_directory, postgres_connection_string, args.schema)
 
     # Delete files after successful import
     delete_files_in_directory(args.csv_directory)

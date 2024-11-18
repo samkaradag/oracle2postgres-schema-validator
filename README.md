@@ -208,7 +208,8 @@ export GOOGLE_CLOUD_PROJECT=project-id
 
 compare --oracle_to_postgres --oracle_host1 oracle_ip --oracle_user1 SYSTEM --oracle_password1 gcp-secret:sct_oracle_pwd  --oracle_service1 orcl_service_name --oracle_view_type all                         --postgres_host1 postgres_ip --postgres_database1 pg_db_name --postgres_user1 dms-test --postgres_password1 gcp-secret:sct_pg_pwd   --staging_postgres_connection_string gcp-secret:sct_pg_staging_pwd --staging_schema schema_compare --format html --schemas_to_compare MOCKSCHEMA --oracle_protocol1 tcps 
 
-To use gcp_secret instead of staging_postgres_connection_string store full connection secret in GCP secret i.e:"postgresql://user:pwd@ip/dbname"
+You can use gcp_secret instaging_postgres_connection_string i.e:"postgresql://user:gcp-secret:secret_name@ip/dbname"
+
 
 ### Controlled execution:
 

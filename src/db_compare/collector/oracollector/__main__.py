@@ -22,6 +22,26 @@ import pathlib
 import platform
 import re
 import sys
+from google.cloud import secretmanager
+
+
+def get_secret(secret_name):
+    """Fetches the secret value from Google Secret Manager."""
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        raise ValueError("GOOGLE_CLOUD_PROJECT environment variable is not set.")
+    secret_path = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(name=secret_path)
+    # print(response)
+    return response.payload.data.decode("UTF-8")
+
+def resolve_password(password_arg):
+    """Resolves the password from the argument or Google Secret Manager."""
+    if password_arg and password_arg.startswith("gcp-secret:"):
+        secret_name = password_arg.split("gcp-secret:")[1]
+        return get_secret(secret_name)
+    return password_arg
 
 
 def extract_queries_to_csv(db_user, db_password, db_host, db_port, db_service, tns, tns_path, config_file, view_type='all', protocol='tcp'):
@@ -150,11 +170,13 @@ def main():
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
+    password = resolve_password(args.password)
+
     # Determine connection method based on provided arguments.
     if args.tns:
-      extract_queries_to_csv(args.user, args.password, None, None, None, args.tns, args.tns_path, "./config_oracle.yaml", args.view_type, args.protocol)
+      extract_queries_to_csv(args.user, password, None, None, None, args.tns, args.tns_path, "./config_oracle.yaml", args.view_type, args.protocol)
     elif args.host and args.port and args.service:
-      extract_queries_to_csv(args.user, args.password, args.host, args.port, args.service, None, None, "./config_oracle.yaml", args.view_type, args.protocol)
+      extract_queries_to_csv(args.user, password, args.host, args.port, args.service, None, None, "./config_oracle.yaml", args.view_type, args.protocol)
     else:
       print("Error: Please provide either --tns OR --host, --port, and --service.")
 
