@@ -1,30 +1,33 @@
 queries:
   - name: "pgdb__columns__data"
     query: |
-      SELECT 
-        'postgres<db-name>' AS PKEY,
-        1 AS CON_ID, 
-        UPPER(c.table_schema) AS OWNER, 
-        UPPER(c.table_name) AS TABLE_NAME, 
-        UPPER(c.column_name) AS COLUMN_NAME, 
-        UPPER(c.data_type) AS DATA_TYPE, 
-        c.character_maximum_length AS DATA_LENGTH, 
-        c.numeric_precision AS DATA_PRECISION, 
-        c.numeric_scale AS DATA_SCALE, 
-        c.is_nullable AS NULLABLE, 
-        'Postgres' AS DMA_SOURCE_ID, 
-        NULL AS DMA_MANUAL_ID
-      FROM 
-        information_schema.columns c
-      JOIN 
-        pg_class cl ON cl.relname = c.table_name 
-      JOIN 
-        pg_namespace ns ON ns.oid = cl.relnamespace
-      LEFT JOIN 
-        pg_inherits inh ON inh.inhrelid = cl.oid
-      WHERE 
-        c.table_schema NOT IN ('pg_catalog', 'information_schema') and UPPER(c.column_name) != 'ROWID'
-        AND inh.inhrelid IS NULL;
+      SELECT * FROM (
+        SELECT 
+          'postgres<db-name>' AS PKEY,
+          1 AS CON_ID, 
+          UPPER(c.table_schema) AS OWNER, 
+          UPPER(c.table_name) AS TABLE_NAME, 
+          UPPER(c.column_name) AS COLUMN_NAME, 
+          UPPER(c.data_type) AS DATA_TYPE, 
+          c.character_maximum_length AS DATA_LENGTH, 
+          c.numeric_precision AS DATA_PRECISION, 
+          c.numeric_scale AS DATA_SCALE, 
+          c.is_nullable AS NULLABLE, 
+          'Postgres' AS DMA_SOURCE_ID, 
+          NULL AS DMA_MANUAL_ID
+        FROM 
+          information_schema.columns c
+        JOIN 
+          pg_class cl ON cl.relname = c.table_name 
+        JOIN 
+          pg_namespace ns ON ns.oid = cl.relnamespace
+        LEFT JOIN 
+          pg_inherits inh ON inh.inhrelid = cl.oid
+        WHERE 
+          c.table_schema NOT IN ('pg_catalog', 'information_schema') and UPPER(c.column_name) != 'ROWID'
+          AND inh.inhrelid IS NULL
+        ) a
+      WHERE 1=1 <owner_filter>;
 # "select 'postgres<db-name>' AS PKEY,1 AS CON_ID, UPPER(table_schema) as OWNER, UPPER(table_name) as TABLE_NAME, UPPER(column_name) as COLUMN_NAME, UPPER(data_type) as DATA_TYPE, character_maximum_length as DATA_LENGTH, numeric_precision as DATA_PRECISION, numeric_scale as DATA_SCALE, is_nullable as NULLABLE, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID  from information_schema.columns where table_schema not in ('pg_catalog','information_schema');"
   - name: "pgdb__instances__data"
     query: "select 'postgres<db-name>' AS PKEY,1 AS CON_ID;"
@@ -95,39 +98,45 @@ queries:
         JOIN pg_namespace AS n ON c.relnamespace = n.oid
         WHERE tgisinternal = false  and n.nspname not in ( 'public', 'information_schema')
       ORDER BY
-          3,4) a where object_type!='i'  and object_name not like '%_ROWID%';
+          3,4) a where object_type!='i'  and object_name not like '%_ROWID%' <owner_filter>;
   - name: "pgdb__sourcecodedetailed__data" 
     query: | 
-      SELECT
-          'postgres<db-name>' AS PKEY,1 AS CON_ID,
-          UPPER(n.nspname) AS OWNER,
-          UPPER(p.proname) AS NAME, -- Procedures and functions
-          CASE p.prokind 
-              WHEN 'p' THEN 'PROCEDURE'
-              WHEN 'f' THEN 'FUNCTION'
-          END AS TYPE,
-          -- pg_get_functiondef(p.oid) AS definition,
-          (SELECT COUNT(*) FROM regexp_split_to_table(pg_get_functiondef(p.oid), '\n')) AS NR_LINES, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
-      FROM
-          pg_proc p
-      JOIN
-          pg_namespace n ON p.pronamespace = n.oid
-      WHERE
-          p.prolang = (SELECT oid FROM pg_language WHERE lanname = 'plpgsql')  -- Filter for PL/pgSQL
-          AND n.nspname NOT IN ('pg_catalog', 'information_schema')  -- Exclude system schemas
-      ORDER BY
-          3,4;
+      SELECT * FROM (
+        SELECT
+            'postgres<db-name>' AS PKEY,1 AS CON_ID,
+            UPPER(n.nspname) AS OWNER,
+            UPPER(p.proname) AS NAME, -- Procedures and functions
+            CASE p.prokind 
+                WHEN 'p' THEN 'PROCEDURE'
+                WHEN 'f' THEN 'FUNCTION'
+            END AS TYPE,
+            -- pg_get_functiondef(p.oid) AS definition,
+            (SELECT COUNT(*) FROM regexp_split_to_table(pg_get_functiondef(p.oid), '\n')) AS NR_LINES, 'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
+        FROM
+            pg_proc p
+        JOIN
+            pg_namespace n ON p.pronamespace = n.oid
+        WHERE
+            p.prolang = (SELECT oid FROM pg_language WHERE lanname = 'plpgsql')  -- Filter for PL/pgSQL
+            AND n.nspname NOT IN ('pg_catalog', 'information_schema')  -- Exclude system schemas
+        ORDER BY
+            3,4
+        ) a
+      WHERE 1=1 <owner_filter> ;
   - name: "pgdb__triggers__data" 
     query: | 
-      SELECT 
-        'postgres<db-name>' AS PKEY,1 AS CON_ID,
-        n.nspname AS OWNER,
-        t.tgname AS trigger_name,
-        -- CASE WHEN t.tgtype = 't' THEN 'ROW' ELSE 'STATEMENT' END AS trigger_type,
-        t.tgrelid::regclass AS table_name,
-        t.tgenabled AS status,
-        'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
-      FROM pg_trigger AS t
-      JOIN pg_class AS c ON t.tgrelid = c.oid
-      JOIN pg_namespace AS n ON c.relnamespace = n.oid
-      WHERE tgisinternal = false  and n.nspname not in ( 'public', 'information_schema');
+      SELECT * FROM (
+        SELECT 
+          'postgres<db-name>' AS PKEY,1 AS CON_ID,
+          n.nspname AS OWNER,
+          t.tgname AS trigger_name,
+          -- CASE WHEN t.tgtype = 't' THEN 'ROW' ELSE 'STATEMENT' END AS trigger_type,
+          t.tgrelid::regclass AS table_name,
+          t.tgenabled AS status,
+          'Postgres' as DMA_SOURCE_ID, NULL as DMA_MANUAL_ID
+        FROM pg_trigger AS t
+        JOIN pg_class AS c ON t.tgrelid = c.oid
+        JOIN pg_namespace AS n ON c.relnamespace = n.oid
+        WHERE tgisinternal = false  and n.nspname not in ( 'public', 'information_schema')
+      ) a
+      WHERE 1=1 <owner_filter> ;

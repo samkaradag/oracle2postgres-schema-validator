@@ -42,7 +42,7 @@ def resolve_password(password_arg):
         return get_secret(secret_name)
     return password_arg
 
-def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
+def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file, schemas_to_compare=None):
     """
     Extracts data from a Postgres database based on queries and connection settings
     provided as input arguments. Writes each query's output to a separate CSV file,
@@ -82,7 +82,11 @@ def extract_queries_to_csv(db_host, db_name, db_user, db_password, config_file):
     for i, query in enumerate(config['queries']):
         # Execute the query
         sql = query["query"].replace("<db-name>",db_host_alpha)
-        
+        if schemas_to_compare:
+            sql = sql.replace('<owner_filter>', f" AND owner IN ({schemas_to_compare}) ")
+        else:
+            sql = sql.replace('<owner_filter>', '')
+
         print(f"Extracting: {query['name']}")
         cur.execute(sql)
 
@@ -138,12 +142,18 @@ def main():
     parser.add_argument('--database', type=str, help='Name of the Postgres database')
     parser.add_argument('--user', type=str, help='Username for the Postgres database')
     parser.add_argument('--password', type=str, help='Password for the Postgres database')
+    parser.add_argument("--schemas_to_compare", default=None,  help="Schemas to be compared (comma-separated).")
+    
     # parser.add_argument('config_file', type=str, help='Path to the YAML configuration file')
     args = parser.parse_args()
 
     password = resolve_password(args.password)
 
-    extract_queries_to_csv(args.host, args.database, args.user, password,"./config.yaml")
+    schemas_to_compare = args.schemas_to_compare 
+    if schemas_to_compare:
+        schemas_to_compare = ",".join([f"'{item.strip()}'" for item in schemas_to_compare.split(',')])
+
+    extract_queries_to_csv(args.host, args.database, args.user, password,"./config.yaml", schemas_to_compare)
 
 if __name__ == "__main__":
     sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])

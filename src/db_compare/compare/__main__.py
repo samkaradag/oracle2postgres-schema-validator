@@ -145,6 +145,7 @@ def main():
             command = ["python", "-m", "oracollector", "--user", args.oracle_user1, "--password", oracle_password1]
             command.extend(arguments)  # Add arguments to the main command list
             command.extend(["--view_type", args.oracle_view_type])
+            command.extend(["--schemas_to_compare", args.schemas_to_compare or ""])
 
             try:
                 subprocess.run(command, check=True) #check=True raises exception on error, capture_output for better error messages
@@ -157,7 +158,7 @@ def main():
         
         # Call pgcollector
         subprocess.run(["python", "-m", "pgcollector", "--host", args.postgres_host1, "--database", args.postgres_database1,
-                        "--user", args.postgres_user1, "--password", postgres_password1], check=True)
+                        "--user", args.postgres_user1, "--password", postgres_password1, "--schemas_to_compare", args.schemas_to_compare or ""], check=True)
         
     
     elif args.oracle_to_oracle:
@@ -173,7 +174,8 @@ def main():
                 command = ["python", "-m", "oracollector",
                         "--user", getattr(args, f"oracle_user{i}"),
                         "--password", oracle_password,
-                        "--view_type", args.oracle_view_type]
+                        "--view_type", args.oracle_view_type, 
+                        "--schemas_to_compare", args.schemas_to_compare or ""]
                 command.extend(arguments)
 
                 result = subprocess.run(command, check=True)
@@ -193,7 +195,7 @@ def main():
         for i in [1, 2]:
             pg_password = resolve_password(getattr(args, f"postgres_password{i}"))
             subprocess.run(["python", "-m", "pgcollector", "--host", getattr(args, f"postgres_host{i}"), "--database", getattr(args, f"postgres_database{i}"),
-                          "--user", getattr(args, f"postgres_user{i}"), "--password", pg_password, "--port", getattr(args, f"postgres_port{i}")], check=True)
+                          "--user", getattr(args, f"postgres_user{i}"), "--password", pg_password, "--port", getattr(args, f"postgres_port{i}"), "--schemas_to_compare", args.schemas_to_compare or ""], check=True)
     
     print("Loading metadata into staging area...")
     # Call importer
